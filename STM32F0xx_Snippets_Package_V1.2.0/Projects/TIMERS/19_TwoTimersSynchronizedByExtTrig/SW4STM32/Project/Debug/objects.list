@@ -1,0 +1,3 @@
+User/main.o
+User/system_stm32f0xx.o
+SW4STM32/Project/Debug/SW4STM32/startup_stm32f072xb.o

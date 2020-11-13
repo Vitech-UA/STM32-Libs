@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>Project</name>
+	<comment />
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<triggers>clean,full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<triggers>full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+		<nature>fr.ac6.mcu.ide.core.MCUProjectNature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name />
+			<type />
+			<location />
+		</link>
+	<link>
+			<name>SW4STM32/startup_stm32f072xb.s</name>
+			<type>1</type>
+			<location>PARENT-5-PROJECT_LOC/Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates/gcc/startup_stm32f072xb.s</location>
+		</link><link>
+			<name>User/system_stm32f0xx.c</name>
+			<type>1</type>
+			<location>PARENT-2-PROJECT_LOC/system_stm32f0xx.c</location>
+		</link><link>
+			<name>User/main.c</name>
+			<type>1</type>
+			<location>PARENT-2-PROJECT_LOC/main.c</location>
+		</link></linkedResources>
+</projectDescription>
