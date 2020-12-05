@@ -1,0 +1,4 @@
+core_cm0.h:623:22:__NVIC_EnableIRQ	16	static
+core_cm0.h:730:22:__NVIC_SetPriority	24	static
+cmsis_usart.c:12:15:Configure_GPIO_USART1	8	static
+cmsis_usart.c:40:16:Configure_USART1	16	static
