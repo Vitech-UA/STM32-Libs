@@ -27,4 +27,8 @@ void DelayInit(void);
 void PWM_Init(void);
 void PWM_SetDutyCycle(uint16_t Duty);
 
+/* Функції для генерації одиночних PWM імпульсів */
+void OnePwmPulseModeInit(uint16_t PulseLengthUs, uint16_t PulseCount);
+void Pulse(); // Функція для генерування Заданої порції однакових імпульсів
+
 #endif /* TIMER_H_ */

@@ -71,7 +71,8 @@ void PWM_Init(void) {
 
 	// PWM_FREQ = SYSCLK / ((PSC+1) * (ARR + 1))
 
-	TIMER_FOR_PWM->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_3;
+	TIMER_FOR_PWM->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2
+			| TIM_CCMR1_OC1M_3;
 
 	/*
 	 0110: PWM mode 1 - In upcounting, channel 1 is active as long as TIMx_CNT<TIMx_CCR1
@@ -116,5 +117,78 @@ void PWM_SetDutyCycle(uint16_t Duty) {
 		Duty = ARR;
 
 	TIMER_FOR_PWM->CCR1 = Duty;
+
+}
+
+void OnePwmPulseModeInit(uint16_t PulseLengthUs, uint16_t PulseCount) {
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+	// Ініціалізація PA8, як канал 1 Таймера 1.
+	GPIOA->MODER |= GPIO_MODER_MODER8_1;
+	/*
+	 00: Input mode (reset state)
+	 01: General purpose output mode
+	 10: Alternate function mode !!!
+	 11: Analog mode
+	 */
+	GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR8;
+	/*
+	 x0: Low speed
+	 01: Medium speed
+	 11: High speed !!!
+	 */
+	GPIOA->AFR[1] |= 0x00000006; /* AF6: TIM1_CH1*/
+	RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // Дозвіл тактування TIM1
+	uint16_t Prescaler = (uint16_t) (SystemCoreClock / 1000000) - 1;
+	TIM1->CR1 &= ~TIM_CR1_CMS;
+	/*
+	 CMS[1:0]: Center-aligned mode selection
+	 00: Edge-aligned mode. The counter counts up or down depending on the direction bit
+	 (DIR).
+	 01: Center-aligned mode 1. The counter counts up and down alternatively. Output compare
+	 interrupt flags of channels configured in output (CCxS=00 in TIMx_CCMRx register) are
+	 set only when the counter is counting down.
+	 10: Center-aligned mode 2. The counter counts up and down alternatively. Output compare
+	 interrupt flags of channels configured in output (CCxS=00 in TIMx_CCMRx register) are
+	 set only when the counter is counting up.
+	 11: Center-aligned mode 3. The counter counts up and down alternatively. Output compare
+	 interrupt flags of channels configured in output (CCxS=00 in TIMx_CCMRx register) are
+	 set both when the counter is counting up or down.
+	 *
+	 */
+	TIM1->CR1 &= ~TIM_CR1_DIR;
+	/* DIR: Direction
+	 0: Counter used as upcounter
+	 1: Counter used as downcounter
+	 */
+	TIM1->CR1 &= ~TIM_CR1_CKD;
+	/*
+	 CKD[1:0]: Clock division
+	 This bit-field indicates the division ratio between the timer clock (CK_INT) frequency and the
+	 dead-time and sampling clock (tDTS)used by the dead-time generators and the digital filters
+	 (ETR, TIx):
+	 00: tDTS=tCK_INT !!!
+	 01: tDTS=2*tCK_INT
+	 10: tDTS=4*tCK_INT
+	 11: Reserved, do not program this value
+	 Note: tDTS = 1/fDTS, tCK_INT = 1/fCK_INT.
+	*/
+	TIM1->ARR = 1000;
+	TIM1->CCR1 = TIM1->ARR - PulseLengthUs;       // Довжина імпульса у мікросекундах
+	TIM1->PSC = Prescaler; // Установка подільника тактування для таймера
+	TIM1->RCR = PulseCount - 1;     // Установка кількості повторів імпульсів
+	TIM1->EGR = TIM_EGR_UG; // Генерація події оновлення для негайної, перезагрузки PSC & RCR
+	TIM1->CR1 |= TIM_CR1_OPM; // Вибiр режимy One Pulse Mode:
+	TIM1->CCMR1 |= TIM_CCMR1_OC1M_0 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_3 | TIM_CCMR1_OC1PE; // PWM Mode 1
+	TIM1->SMCR = RESET;
+	TIM1->CR1 |= TIM_CR1_ARPE; // Autoreload Preload Enable
+	TIM1->CCER |= TIM_CCER_CC1E; // дозвіл виходу Compare каналу 1:
+	TIM1->BDTR |= TIM_BDTR_MOE; // Дозвіл основного виходу таймера:
+
+
+}
+
+void Pulse()
+{
+	TIM1->CR1 |= TIM_CR1_CEN; // Дозвіл роботи таймера
 
 }
