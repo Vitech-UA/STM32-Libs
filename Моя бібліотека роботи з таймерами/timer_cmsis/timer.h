@@ -41,4 +41,7 @@ void TIM1_PWM_DMA_BRUST_Init(void);
 void InitTimerForInterruptGenerationMs(uint16_t TimeBaseMs);
 void InitTimerForInterruptGenerationUs(uint16_t TimeBaseUs);
 void TIM2_IRQHandler(void);
+
+/*Функція запуску циклічної генерації пачки імпульсів шляхом каскадування таймерів*/
+void ConfigCascadeTimersPulseBundleGeneration(void);
 #endif /* TIMER_H_ */
