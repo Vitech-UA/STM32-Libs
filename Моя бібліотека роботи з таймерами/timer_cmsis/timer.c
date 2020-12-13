@@ -7,7 +7,8 @@
 
 #include "timer.h"
 
-uint32_t aSRC_Buffer[BUFFER_DATA_NUMBER] = { 800 - 1, 1, 800, 800 - 1, 0,8500, 4000 - 1, 2, 2000 };
+uint32_t aSRC_Buffer[BUFFER_DATA_NUMBER] = { 800 - 1, 1, 800, 800 - 1, 0, 8500,
+		4000 - 1, 2, 2000 };
 //uint32_t aSRC_Buffer[BUFFER_DATA_NUMBER] = { 1000, 1, 2000, 1, 3000,1, 4000 ,1, 5000 };
 
 uint16_t Tim1Prescaler = 0;
@@ -218,7 +219,6 @@ void TIM1_PWM_DMA_BRUST_Init(void) {
 	DMA_PINC_DISABLE | DMA_MINC_ENABLE |
 	DMA_PDATAALIGN_WORD | DMA_MDATAALIGN_WORD |
 	DMA_CIRCULAR | DMA_PRIORITY_HIGH;
-
 	/* Write to DMA1 Channel5 number of data register register */
 	DMA1_Channel5->CNDTR = BUFFER_DATA_NUMBER;
 
@@ -246,7 +246,6 @@ void TIM1_PWM_DMA_BRUST_Init(void) {
 	 11: High speed !!!
 	 */
 	GPIOA->AFR[1] |= 0x00000006; /* AF6: TIM1_CH1*/
-
 	Tim1Prescaler = (uint16_t) (SystemCoreClock / 32000000) - 1;
 	/* Configure the period */
 	TIM1->ARR = 0xFFFF;
@@ -260,7 +259,6 @@ void TIM1_PWM_DMA_BRUST_Init(void) {
 	TIM1->DCR &= ~TIM_DCR_DBA;
 	TIM1->DCR &= ~TIM_DCR_DBL;
 	TIM1->DCR = TIM_DMABase_ARR | TIM_DMABurstLength_3Transfers; // Кількість порцій за одну DMA транзакцію
-
 	TIM1->EGR |= TIM_EGR_UG; /* Обов'язково генеруємо подію Update */
 	/* Wait until the RESET of UG bit*/
 	while ((TIM1->EGR & TIM_EGR_UG) == SET)
@@ -272,3 +270,52 @@ void TIM1_PWM_DMA_BRUST_Init(void) {
 	TIM1->CR1 |= TIM_CR1_CEN;
 }
 
+void InitTimerForInterruptGenerationMs(uint16_t TimeBaseMs) {
+	/* GPIOA clock enable */
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+	/* Ініціалізація PA8, як GP_Output */
+	GPIOA->MODER |= GPIO_MODER_MODER8_0;
+	/*
+	 00: Input mode (reset state)
+	 01: General purpose output mode !!!
+	 10: Alternate function mode
+	 11: Analog mode
+	 */
+	GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR8;
+	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //TIM2 Timer clock enable
+	TIM2->DIER |= TIM_DIER_UIE;   //Bit 0 UIE: Update interrupt enable
+	TIM2->SMCR &= ~ TIM_SMCR_SMS;
+	TIM2->CR1 |= TIM_CR1_CEN;   //Bit 0 CEN: Counter enable
+	TIM2->PSC = SYSCLK / 1000-1;
+	TIM2->ARR = TimeBaseMs;
+	NVIC_EnableIRQ(TIM2_IRQn); //разрешить прерывания от таймера
+}
+
+void InitTimerForInterruptGenerationUs(uint16_t TimeBaseUs) {
+	/* GPIOA clock enable */
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+	/* Ініціалізація PA8, як GP_Output */
+	GPIOA->MODER |= GPIO_MODER_MODER8_0;
+	/*
+	 00: Input mode (reset state)
+	 01: General purpose output mode !!!
+	 10: Alternate function mode
+	 11: Analog mode
+	 */
+	GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR8;
+	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //TIM2 Timer clock enable
+	//TIM2->CR1 |= TIM_CR1_ARPE;  //Bit 7 ARPE: Auto-reload preload enable
+	TIM2->DIER |= TIM_DIER_UIE;   //Bit 0 UIE: Update interrupt enable
+	TIM2->SMCR &= ~TIM_SMCR_SMS;
+	TIM2->CR1 |= TIM_CR1_CEN;   //Bit 0 CEN: Counter enable
+	TIM2->PSC = SYSCLK / 1000000-1;
+	TIM2->ARR = TimeBaseUs;
+
+	NVIC_EnableIRQ(TIM2_IRQn); //разрешить прерывания от таймера
+
+}
+
+void TIM2_IRQHandler(void) {
+	GPIOA->ODR ^= GPIO_ODR_8;
+	TIM2->SR &= ~ TIM_SR_UIF;
+}

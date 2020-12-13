@@ -37,4 +37,8 @@ void Pulse(); // Функція для генерування Заданої п�
 /* Функції для вивода шим-сигналу довільної форми з буфера aSRC_Buffer(timer.c) через DMA */
 void TIM1_PWM_DMA_BRUST_Init(void);
 
+/* Функції для ініціалізації таймера в роботу в режимі переривань Update Обробник->TIM2_IRQHandler */
+void InitTimerForInterruptGenerationMs(uint16_t TimeBaseMs);
+void InitTimerForInterruptGenerationUs(uint16_t TimeBaseUs);
+void TIM2_IRQHandler(void);
 #endif /* TIMER_H_ */
