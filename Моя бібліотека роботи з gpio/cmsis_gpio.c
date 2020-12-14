@@ -101,7 +101,14 @@ void GpioWrite(GPIO_TypeDef *PORT, uint16_t gpio_pin, OutputState_t state) {
 	if (state == SET_PIN) {
 		PORT->BSRR |= (1 << gpio_pin);           // BIT SET
 	} else {
-		PORT->BSRR = 1 << (gpio_pin * 2);       // BIT reSET
+#ifdef STM32F3
+		//PORT->BRR |= (1<<gpio_pin); // Варіант 1
+		PORT->BSRR |= ((1 << gpio_pin) << 16U); // Варіант 2
+#endif
+
+#ifdef STM32F7
+		PORT->BSRR |= ((1 << gpio_pin) << 16U); // Варіант 2
+#endif
 
 	}
 }
@@ -113,12 +120,12 @@ void GpioSetPin(GPIO_TypeDef *PORT, uint16_t gpio_pin) {
 void GpioResetPin(GPIO_TypeDef *PORT, uint16_t gpio_pin) {
 
 #ifdef STM32F3
-	  //PORT->BRR |= (1<<gpio_pin); // Варіант 1
-	    PORT->BSRR |= ((1 << gpio_pin) << 16U); // Варіант 2
+	//PORT->BRR |= (1<<gpio_pin); // Варіант 1
+	PORT->BSRR |= ((1 << gpio_pin) << 16U); // Варіант 2
 #endif
 
 #ifdef STM32F7
-	    PORT->BSRR |= (gpio_pin << 16U);          // BIT Reset
+	PORT->BSRR |= (gpio_pin << 16U);          // BIT Reset
 #endif
 }
 
