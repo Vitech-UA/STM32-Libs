@@ -10,8 +10,10 @@
 
 #include <stdint.h>
 
-//#define STM32F7
-#define STM32F3
+#define STM32F7
+//#define STM32F4
+//#define STM32F3
+//#define STM32F2
 //#define STM32F1
 //#define STM32F0
 
@@ -35,9 +37,8 @@
 #include "stm32f0xx.h"
 #endif
 
-/* Справедливо для сімейства F7 */
-
-#ifdef STM32F7
+/* Справедливо для сімейства F2,F4,F7 */
+#ifdef STM32F7 || STM32F4 || STM32F2
 //0
 #define DMAEnable ((uint32_t)(1<<0)) // 1: stream enabled
 #define DMADisable ((uint32_t)0)     // 0: stream disabled
@@ -58,7 +59,6 @@
                                                           This bit is protected and can be written only if EN is ‘0’.
                                                           When the memory-to-memory mode is selected (bits DIR[1:0]=10),
                                                           then this bit is automatically forced to 0 by hardware.*/
-
 #define PeriphFlow_ControllerPeriph ((uint32_t)0)   // 0: DMA is the flow controller
 //6-7
 #define PeriphToMemMode ((uint32_t)(0x00 << 6))  // 00: peripheral-to-memory
@@ -105,14 +105,14 @@
 #define PeriphBurstTransferINCR8 ((uint32_t) 2<<21)  // 10: INCR8 (incremental burst of 8 beats) // These bits are protected and can be written only if EN is ‘0
 #define PeriphBurstTransferINCR16 ((uint32_t) 3<<21) // 11: INCR16 (incremental burst of 16 beats) // These bits are protected and can be written only if EN is ‘0
 /* These bits are protected and can be written only if EN is ‘0
-In direct mode, these bits are forced to 0x0 by hardware */
+ In direct mode, these bits are forced to 0x0 by hardware */
 //23-24
 #define MemBurstTransferSingleTransfer ((uint32_t) 0<<23) // 00: single transfer
 #define MemBurstTransferINCR4 ((uint32_t) 1<<23)  // 01: INCR4 (incremental burst of 4 beats // These bits are protected and can be written only if EN is ‘0
 #define MemBurstTransferINCR8 ((uint32_t) 2<<23)  // 10: INCR8 (incremental burst of 8 beats) // These bits are protected and can be written only if EN is ‘0
 #define MemBurstTransferINCR16 ((uint32_t) 3<<23) // 11: INCR16 (incremental burst of 16 beats) // These bits are protected and can be written only if EN is ‘0
 /* These bits are protected and can be written only if EN is ‘0
-In direct mode, these bits are forced to 0x0 by hardware */
+ In direct mode, these bits are forced to 0x0 by hardware */
 
 //25-26
 #define SelectCh0 ((uint32_t) 0<<25) // 000: channel 0 selected
@@ -125,23 +125,20 @@ In direct mode, these bits are forced to 0x0 by hardware */
 #define SelectCh7 ((uint32_t) 7<<25) // 111: channel 7 selected
 /*These bits are protected and can be written only if EN is ‘0’.*/
 
+	void DMA_InitMemToMem(DMA_Stream_TypeDef *Channel, uint32_t Src, uint32_t Dst,
+			uint32_t Size);
+	void DMA_InitMemToPer(DMA_Stream_TypeDef *Channel, uint32_t SrcMem,
+			uint32_t DstPer, uint32_t Size);
+	void DMA_Enable(DMA_Stream_TypeDef *Channel);
+	void DMA_Disable(DMA_Stream_TypeDef *Channel);
+	uint32_t DMA_GetCurrentDataCounter(DMA_Stream_TypeDef *Channel);
+	void DMA_DeInit(DMA_Stream_TypeDef *Channel);
+	void DMA1_Stream2_IRQHandler(void);
+
 #endif
 
-#ifdef STM32F7
-void DMA_Init(DMA_Stream_TypeDef *Channel, uint32_t Src, uint32_t Dst,
-		uint32_t Size, uint32_t Conf);
-void DMA_Enable(DMA_Stream_TypeDef *Channel);
-void DMA_Disable(DMA_Stream_TypeDef *Channel);
-uint32_t DMA_GetCurrentDataCounter(DMA_Stream_TypeDef *Channel);
-void DMA_DeInit(DMA_Stream_TypeDef *Channel);
-void DMA1_Stream2_IRQHandler(void);
-#endif /* CMSIS_DMA_H_ */
-#endif
-
-
-/* Справедливо для сімейства F3 */
-
-#ifdef STM32F3
+/* Справедливо для сімейства F0, F1, F3 */
+#ifdef STM32F0
 #define DMAEnable ((uint16_t)(1<<0))
 #define DMADisable ((uint16_t)0)
 
@@ -183,7 +180,7 @@ void DMA1_Stream2_IRQHandler(void);
 #define M2M_Disable 0
 #define CCR_CLEAR_Mask           ((uint32_t)0xFFFF8001)
 
-void DMA_Init(DMA_Channel_TypeDef *Channel, uint32_t Src, uint32_t Dst,
+void DMA_InitMemToMem(DMA_Channel_TypeDef *Channel, uint32_t Src, uint32_t Dst,
 		uint32_t Size, uint16_t Conf);
 void DMA_Enable(DMA_Channel_TypeDef *Channel);
 void DMA_Disable(DMA_Channel_TypeDef *Channel);
@@ -192,3 +189,4 @@ void DMA_DeInit(DMA_Channel_TypeDef *Channel);
 void DMA1_Stream2_IRQHandler(void);
 
 #endif
+#endif /* CMSIS_DMA_H_ */
