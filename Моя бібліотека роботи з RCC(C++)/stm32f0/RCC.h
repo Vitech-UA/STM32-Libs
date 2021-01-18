@@ -1,0 +1,115 @@
+#pragma once
+
+#include "stm32f051x8.h"
+
+#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *) __FILE__, __LINE__))
+
+#define IS_MCO_TYPE(TYPE) (((TYPE) == MCO_DISABLED) || ((TYPE) == MCO_HSI_14Mhz) || ((TYPE) == MCO_LSI) || \
+ ((TYPE) == MCO_LSE) || ((TYPE) == MCO_SystemClock)||((TYPE) == MCO_HSI_8Mhz)||((TYPE) == MCO_HSE))||((TYPE) == MCO_PLL))||((TYPE) == MCO_HSI48))
+
+typedef enum MCO_CHANEL {
+
+	//Актуально для STM32F051R8T6
+	MCO_DISABLED = 0,
+	MCO_HSI_14Mhz,
+	MCO_LSI,
+	MCO_LSE,
+	MCO_SystemClock,
+	MCO_HSI_8Mhz,
+	MCO_HSE,
+	MCO_PLL,
+	MCO_HSI48
+
+/*
+	0000: MCO output disabled, no clock on MCO
+	0001: Internal RC 14 MHz (HSI14) oscillator clock selected
+	0010: Internal low speed (LSI) oscillator clock selected
+	0011: External low speed (LSE) oscillator clock selected
+	0100: System clock selected
+	0101: Internal RC 8 MHz (HSI) oscillator clock selected
+	0110: External 4-32 MHz (HSE) oscillator clock selected
+	0111: PLL clock selected (divided by 1 or 2, depending on PLLNODIV)
+	1000: Internal RC 48 MHz (HSI48) oscillator clock selected
+*/
+
+} MCO_CHANEL;
+
+
+typedef enum HCLK_PRESCELAR {
+	HCLK_NOT_DIVIDED,
+	HCLK_DIV_BY_2,
+	HCLK_DIV_BY_4,
+	HCLK_DIV_BY_8,
+	HCLK_DIV_BY_16
+
+}APB1_PRESCALER_t, APB2_PRESCALER_t;
+typedef enum SYSCLK_SOURCE {
+	HSI,
+	HSE,
+	PLL,
+	HSI48
+
+}SYSCLK_SOURCE_t;
+typedef enum SYSCLK_PRESCELAR {
+	SYSCLK_NOT_DIVIDED,
+	SYSCLK_DIV_BY_2,
+	SYSCLK_DIV_BY_4,
+	SYSCLK_DIV_BY_8,
+	SYSCLK_DIV_BY_16,
+	SYSCLK_DIV_BY_64,
+	SYSCLK_DIV_BY_128,
+	SYSCLK_DIV_BY_256,
+	SYSCLK_DIV_BY_512,
+
+}AHB_PRESCALER_t;
+typedef enum PLL_MULTIPLER {
+	PLL_MULx2 = 0,
+	PLL_MULx3,
+	PLL_MULx4,
+	PLL_MULx5,
+	PLL_MULx6,
+	PLL_MULx7,
+	PLL_MULx8,
+	PLL_MULx9,
+	PLL_MULx10,
+	PLL_MULx11,
+	PLL_MULx12,
+	PLL_MULx13,
+	PLL_MULx14,
+	PLL_MULx15,
+	PLL_MULx16,	
+}PLL_MUL_t;
+typedef enum PLL_SRC{
+	HSI_DIV_By2=0,
+	HSI_PREDIV,
+	HSE_PREDIV,
+	HSI48_PREDIV
+	}PLL_SRC_t;
+class MCO
+
+{
+public:
+	void SetChanel(MCO_CHANEL ch);
+	void Init(void);
+};
+
+class Clock
+{
+public:
+	void Init(void);
+private:
+	static void EnableHSE(void);
+	static void DisableHSE(void);
+	static void EnablePLL(void);
+	static void DisablePLL(void);
+	static void EnableCSS(void);
+	static void DisableCSS(void);
+	static void EnableHSI(void);
+	static void DisableHSI(void);
+	static void Set_APB1_Prescaler(APB1_PRESCALER_t PRSC);
+	static void Set_APB2_Prescaler(APB2_PRESCALER_t PRSC);
+	static void Set_AHB_Prescaler(AHB_PRESCALER_t PRSC);
+	static void Set_SYSCLK_Source(SYSCLK_SOURCE_t SRC);
+	static void Set_PLL_Multipler(PLL_MUL_t MUL);
+	static void Set_PLL_Source(PLL_SRC_t SRC);
+};
