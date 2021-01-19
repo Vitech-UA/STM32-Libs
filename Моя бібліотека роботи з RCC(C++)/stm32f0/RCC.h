@@ -33,8 +33,6 @@ typedef enum MCO_CHANEL {
 */
 
 } MCO_CHANEL;
-
-
 typedef enum HCLK_PRESCELAR {
 	HCLK_NOT_DIVIDED,
 	HCLK_DIV_BY_2,
@@ -85,8 +83,47 @@ typedef enum PLL_SRC{
 	HSE_PREDIV,
 	HSI48_PREDIV
 	}PLL_SRC_t;
-class MCO
+typedef enum APB_PRCS{
+	APB_NOT_DIVIDED = 0,
+	APB_DIV_BY_2,
+	APB_DIV_BY_4,
+	APB_DIV_BY_8,
+	APB_DIV_BY_16	
+}APB_PRSC_t;
+typedef enum AHB_PRCS{
+	AHB_NOT_DIVIDED = 0,
+	AHB_DIV_BY_2,
+	AHB_DIV_BY_4,
+	AHB_DIV_BY_8,
+	AHB_DIV_BY_16,
+	AHB_DIV_BY_32,
+	AHB_DIV_BY_64,
+	AHB_DIV_BY_128,
+	AHB_DIV_BY_256,
+	AHB_DIV_BY_512,
+}AHB_PRSC_t;
+typedef enum PREDIV_PRSC
+{
+	PREDIV_INPUT_CLOCK_NOT_DIV = 0, // 0000
+	PREDIV_INPUT_CLOCK_DIV_BY_2,
+	PREDIV_INPUT_CLOCK_DIV_BY_3,
+	PREDIV_INPUT_CLOCK_DIV_BY_4,
+	PREDIV_INPUT_CLOCK_DIV_BY_5,
+	PREDIV_INPUT_CLOCK_DIV_BY_6,
+	PREDIV_INPUT_CLOCK_DIV_BY_7,
+	PREDIV_INPUT_CLOCK_DIV_BY_8,
+	PREDIV_INPUT_CLOCK_DIV_BY_9,
+	PREDIV_INPUT_CLOCK_DIV_BY_10,
+	PREDIV_INPUT_CLOCK_DIV_BY_11,
+	PREDIV_INPUT_CLOCK_DIV_BY_12,
+    PREDIV_INPUT_CLOCK_DIV_BY_13,
+	PREDIV_INPUT_CLOCK_DIV_BY_14,
+	PREDIV_INPUT_CLOCK_DIV_BY_15,
+	PREDIV_INPUT_CLOCK_DIV_BY_16    // 1111
 
+
+}PREDIV_PRSC_t;
+class MCO
 {
 public:
 	void SetChanel(MCO_CHANEL ch);
@@ -106,10 +143,11 @@ private:
 	static void DisableCSS(void);
 	static void EnableHSI(void);
 	static void DisableHSI(void);
-	static void Set_APB1_Prescaler(APB1_PRESCALER_t PRSC);
-	static void Set_APB2_Prescaler(APB2_PRESCALER_t PRSC);
-	static void Set_AHB_Prescaler(AHB_PRESCALER_t PRSC);
 	static void Set_SYSCLK_Source(SYSCLK_SOURCE_t SRC);
 	static void Set_PLL_Multipler(PLL_MUL_t MUL);
 	static void Set_PLL_Source(PLL_SRC_t SRC);
+	static void ConfigFlashMemoryClk(void);
+	static void Set_AHB_Prescaler(AHB_PRSC_t psc);
+	static void Set_APB_Prescaler(APB_PRSC_t psc);
+	static void Set_PREDIV(PREDIV_PRSC_t psc);
 };
