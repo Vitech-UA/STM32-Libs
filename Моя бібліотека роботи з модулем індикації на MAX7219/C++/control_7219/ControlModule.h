@@ -20,6 +20,11 @@ typedef enum BUTTON_STATE {
 
 } BUTTON_STATE_t;
 
+typedef enum BUZZER_STATE {
+	ON, OFF
+
+} BUZZER_STATE_t;
+
 /* Розкоментувати серію стм 32 */
 #define STM32Fx 0
 //#define STM32Fx 1
@@ -51,6 +56,16 @@ class Button {
 public:
 	void Config(GPIO_TypeDef *ButtonPort, uint16_t ButtonPin);
 	BUTTON_STATE_t GetState(void);
+private:
+	GPIO_TypeDef *Port;
+	uint16_t Pin;
+
+};
+
+class Buzzer {
+public:
+	void Config(GPIO_TypeDef *ButtonPort, uint16_t ButtonPin);
+	void SetState(BUZZER_STATE_t);
 private:
 	GPIO_TypeDef *Port;
 	uint16_t Pin;

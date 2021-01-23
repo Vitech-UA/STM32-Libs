@@ -21,34 +21,33 @@
 #include "main.h"
 #include "ControlModule.h"
 
-int main(void)
-{
-
+int main(void) {
 
 	ControlModule MAX7219 = ControlModule(SPI1);
 
 	Led RedLed, GreenLed;
-    RedLed.Config(GPIOB, 13);
-    GreenLed.Config(GPIOC, 8);
+	RedLed.Config(GPIOB, 13);
+	GreenLed.Config(GPIOC, 8);
 
-    GreenLed.SetState(LED_ON);
-    RedLed.SetState(LED_ON);
+	GreenLed.SetState(LED_ON);
+	RedLed.SetState(LED_ON);
 
-    Button UpButton,DownButton;
-    UpButton.Config(GPIOA, 8);
-    DownButton.Config(GPIOF, 7);
+	Button UpButton, DownButton;
+	UpButton.Config(GPIOA, 8);
+	DownButton.Config(GPIOF, 7);
 
-    if(UpButton.GetState()==PRESSED)
-    	RedLed.SetState(LED_OFF);
+	if (UpButton.GetState() == PRESSED)
+		RedLed.SetState(LED_OFF);
 
-    if(DownButton.GetState()==PRESSED)
-        	GreenLed.SetState(LED_OFF);
+	if (DownButton.GetState() == PRESSED)
+		GreenLed.SetState(LED_OFF);
 
+	Buzzer Beeper;
+	Beeper.Config(GPIOA, 12);
+	Beeper.SetState(ON);
+	Beeper.SetState(OFF);
 
-
-
-
-
-    /* Loop forever */
-	for(;;);
+	/* Loop forever */
+	for (;;)
+		;
 }

@@ -77,3 +77,24 @@ BUTTON_STATE_t Button::GetState(void) {
 
 }
 
+void Buzzer::Config(GPIO_TypeDef *BuzzerPort, uint16_t BuzzerPin) {
+	this->Port = BuzzerPort;
+	this->Pin = BuzzerPin;
+	GpioEnableClk(BuzzerPort);
+
+	/*Встановити як вихід пуш-пул*/
+	this->Port->MODER |= (0x01 << (this->Pin * 2)); // GPIO->To output
+	this->Port->PUPDR |= (0x01 << (this->Pin * 2)); // PullUp(Св.діод керується катодом)
+	this->Port->BSRR |= (1 << this->Pin) << 16U;
+
+}
+void Buzzer::SetState(BUZZER_STATE_t BuzzerState) {
+	switch (BuzzerState) {
+	case ON:
+		this->Port->BSRR |= (1 << this->Pin); // Reset
+		break;
+	case OFF:
+		this->Port->BSRR |= (1 << this->Pin) << 16U; // Reset
+		break;
+	}
+}
