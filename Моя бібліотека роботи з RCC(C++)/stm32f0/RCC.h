@@ -1,5 +1,13 @@
 #pragma once
 
+/*
+
+  INFO:
+  Для ініціалізації модулz RCC, достатньо створити об'єкт його класу у функції main.
+  Ініціалізація відбувається автоматично в конструкторі.
+
+ */
+
 #include "stm32f051x8.h"
 
 #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *) __FILE__, __LINE__))
@@ -133,8 +141,11 @@ public:
 class Clock
 {
 public:
-	void Init(void);
+	 Clock();
+	 void Init(void);
+
 private:
+
 	static void EnableHSE(void);
 	static void DisableHSE(void);
 	static void EnablePLL(void);
