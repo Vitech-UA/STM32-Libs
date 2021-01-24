@@ -23,15 +23,15 @@
 
 int main(void) {
 
-	ControlModule MAX7219 = ControlModule(SPI1);
-
+	/*Світлодіоди
 	Led RedLed, GreenLed;
 	RedLed.Config(GPIOB, 13);
 	GreenLed.Config(GPIOC, 8);
 
 	GreenLed.SetState(LED_ON);
-	RedLed.SetState(LED_ON);
+	RedLed.SetState(LED_ON);*/
 
+	/*Кнопки
 	Button UpButton, DownButton;
 	UpButton.Config(GPIOA, 8);
 	DownButton.Config(GPIOF, 7);
@@ -40,14 +40,27 @@ int main(void) {
 		RedLed.SetState(LED_OFF);
 
 	if (DownButton.GetState() == PRESSED)
-		GreenLed.SetState(LED_OFF);
-
+		GreenLed.SetState(LED_OFF);*/
+	/*Бузер
 	Buzzer Beeper;
 	Beeper.Config(GPIOA, 12);
 	Beeper.SetState(ON);
-	Beeper.SetState(OFF);
+	Beeper.SetState(OFF);*/
+
+	/*Індикатор*/
+	ControlModule MAX7219 = ControlModule();
+
+	MAX7219.Init();
+
+	MAX7219.Clear();
+
+	MAX7219.Print(1994);
+
+
+
 
 	/* Loop forever */
-	for (;;)
-		;
+	for (;;) {
+
+	}
 }
