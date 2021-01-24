@@ -127,6 +127,13 @@ void ControlModule::Print(volatile uint16_t number) {
 	this->Transmit(4, NUM[DIG4]);
 
 }
+
+void ControlModule::SetBrightness(uint8_t Intensity){
+if(Intensity > 15) Intensity = 15;
+if(Intensity <0) Intensity = 0;
+	this->Transmit(0x0A, Intensity);
+
+}
 /*************************LED************************************/
 void Led::SetState(LED_STATE_t LedState) {
 	switch (LedState) {

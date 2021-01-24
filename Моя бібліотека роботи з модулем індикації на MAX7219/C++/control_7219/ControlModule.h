@@ -62,6 +62,7 @@ public:
 	void Init();
 	void Clear(void);
 	void Print(volatile uint16_t number);
+	void SetBrightness(uint8_t Intensity);
 private:
 	void nCS_LOW(void);
 	void nCS_HIGH(void);
