@@ -31,27 +31,20 @@ int main(void) {
 	Gpio Sensor = Gpio(GPIOB, 0);
 	Sensor.SetAsInput(PDown);
 
-	// Налаштування сенсора: XP9
-	//Gpio SecSensor = Gpio(GPIOC, 5);
-	//Sensor.SetAsInput(PDown);
 
+	Adc CurrentSensor = Adc(IN1);
+	Adc VoltageSensor = Adc(IN0);
+	Adc TempSensor = Adc(IN16);
 
-
-	Adc CurrentSensorCh = Adc(IN0);
-
-	uint16_t ADC_Result;
+	uint16_t CurrentSensorResult = 0;
+	uint16_t VoltageSensorResult = 0;
+	uint16_t TemperatureSensorResult = 0;
 
 	while (1) {
 
-		ADC1->CR |= ADC_CR_ADSTART;
-
-			while (!(ADC1->ISR & ADC_ISR_EOC))
-			{
-
-			}
-			ADC_Result = ADC1->DR;
-		EnableFan(MixerFan);
-
+		//CurrentSensorResult = CurrentSensor.GetValue();
+		//VoltageSensorResult = VoltageSensor.GetValue();
+		TemperatureSensorResult = TempSensor.GetMcuTemperature();
 	}
 }
 

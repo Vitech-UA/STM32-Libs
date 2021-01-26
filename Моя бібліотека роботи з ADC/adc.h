@@ -8,7 +8,14 @@
 #ifndef ADC_H_
 #define ADC_H_
 
+
 #include "stm32f051x8.h"
+
+/* Temperature sensor calibration value address */
+#define TEMP110_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7C2))
+#define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
+#define VDD_CALIB ((uint16_t) (330))
+#define VDD_APPLI ((uint16_t) (300))
 
 #define ADC_IN0 0x01
 #define ADC_IN1 0x02
@@ -27,27 +34,27 @@
 #define ADC_IN14 0x4000
 #define ADC_IN15 0x8000
 
+typedef enum ADC_IN {
 
-typedef enum ADC_IN{
+	IN0 = 0,
+	IN1,
+	IN2,
+	IN3,
+	IN4,
+	IN5,
+	IN6,
+	IN7,
+	IN8,
+	IN9,
+	IN10,
+	IN11,
+	IN12,
+	IN13,
+	IN14,
+	IN15,
+	IN16
 
-IN0 = 0,
-IN1,
-IN2,
-IN3,
-IN4,
-IN5,
-IN6,
-IN7,
-IN8,
-IN9,
-IN10,
-IN11,
-IN12,
-IN13,
-IN14,
-IN15,
-
-}ADC_IN_t;
+} ADC_IN_t;
 
 // Можливі джерела тактування ADC
 typedef enum ADC_CLOCK_SOURCE {
@@ -56,22 +63,21 @@ typedef enum ADC_CLOCK_SOURCE {
 	ADC_PCLK_DivBy4, // Відсутній джитер з цим джерелом тактування !!!
 } ADC_CLOCK_SOURCE_t;
 
-
 class Adc {
 
 public:
-
 	Adc(ADC_IN_t channel);
-
+	uint16_t GetValue(void); // Запускає перетворення і повертає значення АЦП
+	uint16_t GetMcuTemperature(void);
 private:
-    void Init(ADC_IN_t channel);
 	void SetClockSource(ADC_CLOCK_SOURCE_t ADC_CLK_MODE);
 	void Calibrate(void);
 	void AddToScan(ADC_IN_t channel);
+	void ConfigGpio(ADC_IN_t channel);
 
+	ADC_IN_t CurrentItemChannel;
 	ADC_TypeDef *ADC_ITEM;
-	GPIO_TypeDef ADC_CH_PORT; // Порт на якому розміщено пін для оцифровки сигналу
-	uint16_t ADC_CH_PIN;      // Номер піна
+
 };
 
 #endif /* ADC_H_ */
