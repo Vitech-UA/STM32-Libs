@@ -10,7 +10,6 @@
 
 Gpio::Gpio(GPIO_TypeDef *PORT, uint16_t gpio_pin) {
 	// Ініціалізація піна
-
 	item_port = PORT;
 	item_pin = gpio_pin;
 	this->GpioEnableClk(); // Ввімкнути тактування вибраного порта
@@ -19,17 +18,26 @@ Gpio::Gpio(GPIO_TypeDef *PORT, uint16_t gpio_pin) {
 void Gpio::GpioEnableClk() {
 
 	GPIO_TypeDef *PORT = this->item_port;
-
+// Перед спробою ввімкнення тактування проходить перевірка, чи не було воно ввімкнене раніше.
 	if (PORT == GPIOA) {
-		RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+		if (!(RCC->AHBENR & RCC_AHBENR_GPIOAEN)) {
+			RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+		}
 	} else if (PORT == GPIOB) {
-		RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+		if (!(RCC->AHBENR & RCC_AHBENR_GPIOBEN)) {
+			RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+		}
 	} else if (PORT == GPIOC) {
-		RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+		if (!(RCC->AHBENR & RCC_AHBENR_GPIOCEN)) {
+			RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+		}
 	} else if (PORT == GPIOD) {
-		RCC->AHBENR |= RCC_AHBENR_GPIODEN;
+		if (!(RCC->AHBENR & RCC_AHBENR_GPIODEN)) {
+			RCC->AHBENR |= RCC_AHBENR_GPIODEN;
+		}
 	}
 }
+
 void Gpio::GpioSetOutputType(OUTPUT_TYPE_t GpioOutputType) {
 	this->item_port->OTYPER |= GpioOutputType << GpioOutputType;
 }
@@ -89,7 +97,7 @@ void Gpio::SetAsGenerapPurporseOutput(OUTPUT_TYPE_t GpioOutputType) {
 }
 void Gpio::SetAsInput(GPIO_PU_PD_t GpioPullUp_PullDown) {
 	this->item_port->MODER &= ~(0x03 << (this->item_pin * 2)); // Скидання бітового поля, відповідного піна призведе до його конфігурування як вхід
-	this->item_port->PUPDR |= GpioPullUp_PullDown << (this->item_pin * 2);
+	this->item_port->PUPDR |= (GpioPullUp_PullDown << (this->item_pin * 2));
 
 }
 void Gpio::Deinit(void) {
@@ -99,10 +107,10 @@ void Gpio::Deinit(void) {
 	this->item_port->PUPDR &= ~(0x03 << (this->item_pin * 2));
 }
 
-bool Gpio::IsSet(void){
+bool Gpio::IsSet(void) {
 
 	bool PinState;
-	if(this->item_port->IDR & (0x01 << this->item_pin))
+	if (this->item_port->IDR & (0x01 << this->item_pin))
 		PinState = true;
 	else
 		PinState = false;
