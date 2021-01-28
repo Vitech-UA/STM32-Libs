@@ -16,27 +16,28 @@
 #define USART2_PA2Tx_PA3Rx
 //#define USART2_PA14Tx_PA15Rx
 
-Uart::Uart(USART_TypeDef *UartPort) {
+Uart::Uart(USART_TypeDef *UartPort, uint32_t UsartBrrValue) {
 
 	this->ItemUsart = UartPort;
+	this->ItemUsartBrrValue = UsartBrrValue;
+
 	this->InitGpio();
 	this->EnableClock(this->ItemUsart);
 	this->Init();
 }
 
 void Uart::InitGpio(void) {
-// В залежності від того, який USART обрано його й ініціалізуємо
+// Взалежності від того, який USART обрано його й ініціалізуємо
 	if (this->ItemUsart == USART1) {
 
 #ifdef USART1_PB6Tx_PB7Rx
 		// PB6 USART1->Tx(AF0)
-		// PB7 USART1->Rx
+		// PB7 USART1->Rx(AF0)
 		Gpio USART1_tx = Gpio(GPIOB, 6);
 		Gpio USART1_rx = Gpio(GPIOB, 7);
 
 		USART1_tx.SetAsAF(AF0, OUTPUT_PP);
 		USART1_rx.SetAsAF(AF0);
-		USART1_rx.SetAsInput(PUp);
 #endif
 
 #ifdef USART1_PA9Tx_PA10Rx
@@ -47,7 +48,7 @@ void Uart::InitGpio(void) {
 		Gpio USART1_rx = Gpio(GPIOA, 10);
 
 		USART1_tx.SetAsAF(AF1, OUTPUT_PP);
-		USART1_rx.SetAsInput(PUp);
+		USART1_rx.SetAsAF(AF0);
 #endif
 	} else if (this->ItemUsart == USART2) {
 #ifdef USART2_PA2Tx_PA3Rx
@@ -57,7 +58,7 @@ void Uart::InitGpio(void) {
 		Gpio USART2_rx = Gpio(GPIOA, 3);
 
 		USART2_tx.SetAsAF(AF1, OUTPUT_PP);
-		USART2_rx.SetAsInput(PUp);
+		USART2_rx.SetAsAF(AF0);
 #endif
 
 #ifdef USART2_PA14Tx_PA15Rx
@@ -67,7 +68,7 @@ void Uart::InitGpio(void) {
 		Gpio USART2_rx = Gpio(GPIOA, 15);
 
 		USART2_tx.SetAsAF(AF1, OUTPUT_PP);
-		USART2_rx.SetAsInput(PUp);
+		USART2_rx.SetAsAF(AF0);
 #endif
 
 	} else {
@@ -96,10 +97,30 @@ void Uart::EnableClock(USART_TypeDef *UartPort) {
 void Uart::Init(void) {
 	this->ItemUsart->CR1 = 0;             // Скидаю налаштування
 	this->ItemUsart->CR1 |= USART_CR1_UE; // Вмикаю модуль USART;
-	this->ItemUsart->BRR = 5000;          // Для 9600 Бод, при 48 МГц.
+
+	//this->ItemUsart->BRR = 5000;          // Для 9600 Бод, при 48 МГц.
+
+	if (this->ItemUsart->CR1 & USART_CR1_OVER8) {
+		// Oversampling by 8
+
+	} else {
+		// Oversampling by 16
+		int UsartBrrValue = 0;
+
+		UsartBrrValue = HCLK / this->ItemUsartBrrValue;
+
+		this->ItemUsart->BRR = UsartBrrValue;
+	}
+
 	this->ItemUsart->CR1 |= USART_CR1_TE; // Transmit enable
-	this->ItemUsart->CR2 = 0;
-	this->ItemUsart->CR3 = 0;
+	this->ItemUsart->CR1 |= USART_CR1_RE; // Receive enable
+
+	//this->ItemUsart->CR2 = 0;
+	//this->ItemUsart->CR3 = 0;
+}
+
+uint8_t Uart::ReceiveByte(void) {
+
 }
 
 void Uart::SendByte(uint8_t ByteToTransmit) {
@@ -123,16 +144,19 @@ void Uart::EnableTxInterrupt(void) {
 	}
 
 	if (this->ItemUsart == USART1) {
+		NVIC_SetPriority(USART1_IRQn, 0);
 		NVIC_EnableIRQ(USART1_IRQn);
 	}
 
 	if (this->ItemUsart == USART2) {
+		NVIC_SetPriority(USART2_IRQn, 0);
 		NVIC_EnableIRQ(USART2_IRQn);
 	}
 }
 void Uart::EnableRxInterrupt(void) {
 	if (!(this->ItemUsart->CR1 & USART_CR1_RXNEIE)) {
 		this->ItemUsart->CR1 |= USART_CR1_RXNEIE;
+		__NVIC_EnableIRQ(USART1_IRQn);
 	}
 
 	if (this->ItemUsart == USART1) {
