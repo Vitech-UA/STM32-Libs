@@ -96,6 +96,7 @@ void Gpio::SetAsGenerapPurporseOutput(OUTPUT_TYPE_t GpioOutputType) {
 	this->item_port->OTYPER |= GpioOutputType << this->item_pin;
 }
 void Gpio::SetAsInput(GPIO_PU_PD_t GpioPullUp_PullDown) {
+	this->GpioSetOutputSpeed(HIGH_SPEED);
 	this->item_port->MODER &= ~(0x03 << (this->item_pin * 2)); // Скидання бітового поля, відповідного піна призведе до його конфігурування як вхід
 	this->item_port->PUPDR |= (GpioPullUp_PullDown << (this->item_pin * 2));
 
