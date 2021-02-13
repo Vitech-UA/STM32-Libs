@@ -61,12 +61,15 @@ public:
 	ControlModule();
 	void Init();
 	void Clear(void);
-	void Print(volatile uint16_t number);
+	void PrintInt(volatile uint16_t number);
+	void PrintFloat(float number);
 	void SetBrightness(uint8_t Intensity);
+	void PrintChar(uint8_t rg, uint8_t dt);
+	void Transmit(uint8_t rg, uint8_t dt); /*Перенести у приват*/
 private:
 	void nCS_LOW(void);
 	void nCS_HIGH(void);
-	void Transmit(uint8_t rg, uint8_t dt);
+
 	void ConfigMAX7219(SPI_TypeDef *SPI_PORT);
 	void ConfigGPIO(GPIO_TypeDef *clk_port, uint16_t clk_pin,
 			GPIO_TypeDef *din_port, uint16_t din_pin, GPIO_TypeDef *load_port,

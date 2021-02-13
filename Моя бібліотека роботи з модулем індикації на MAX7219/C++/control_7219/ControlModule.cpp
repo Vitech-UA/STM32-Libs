@@ -5,8 +5,9 @@
  *      Author: Embed Viktor
  */
 #include <ControlModule.h>
-
-char SEG[9] = { 0x63, 0x0F, 0x47, 0x4F, 0x05, 0x00 };
+#include <math.h>
+//            'град'   't'    'F'  'E'    'r'  ' '   'S'
+char CHAR[9] = { 0x63, 0x0F, 0x47, 0x4F, 0x05, 0x00, 0x6D };
 /*                0    1      2     3     4     5     6    7     8      9 */
 char NUM[10] = { 0x7E, 0x30, 0x6D, 0x79, 0x33, 0x5B, 0x5F, 0x70, 0x7F, 0x7B };
 
@@ -39,11 +40,11 @@ void ControlModule::ConfigMAX7219(SPI_TypeDef *SPI_PORT) {
 	RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 
 	this->SPI_ITEM->CR1 |= SPI_CR1_BIDIMODE; // 1: line bidirectional data mode selected
-	this->SPI_ITEM->CR1 |= SPI_CR1_BIDIOE;   // 1: Output enabled (transmit-only mode)
+	this->SPI_ITEM->CR1 |= SPI_CR1_BIDIOE; // 1: Output enabled (transmit-only mode)
 	this->SPI_ITEM->CR1 |= SPI_CR1_MSTR;     // 1: Master configuration
 	this->SPI_ITEM->CR1 &= ~SPI_CR1_BR;      // 000: fPCLK/2
-	this->SPI_ITEM->CR1 &= ~SPI_CR1_LSBFIRST;// 0: data is transmitted / received with the MSB first
-	this->SPI_ITEM->CR1 |= SPI_CR1_SSM;      // 1: Software slave management enabled
+	this->SPI_ITEM->CR1 &= ~SPI_CR1_LSBFIRST; // 0: data is transmitted / received with the MSB first
+	this->SPI_ITEM->CR1 |= SPI_CR1_SSM;  // 1: Software slave management enabled
 	this->SPI_ITEM->CR1 |= SPI_CR1_SSI;
 	this->SPI_ITEM->CR2 &= ~SPI_CR2_DS;      //Clear bitfield
 	this->SPI_ITEM->CR2 |= 0x0F << SPI_CR2_DS_Pos; // 16 Bit frame
@@ -108,7 +109,7 @@ void ControlModule::Clear(void) {
 	} while (--i);
 
 }
-void ControlModule::Print(volatile uint16_t number) {
+void ControlModule::PrintInt(volatile uint16_t number) {
 	volatile uint16_t n = 0;
 	n = number;
 	if (n >= 9999)
@@ -128,9 +129,52 @@ void ControlModule::Print(volatile uint16_t number) {
 
 }
 
-void ControlModule::SetBrightness(uint8_t Intensity){
-if(Intensity > 15) Intensity = 15;
-if(Intensity <0) Intensity = 0;
+void ControlModule::PrintFloat(float number) {
+
+	float Buffer = number;
+	int Left = Buffer;
+	float Drob = Buffer - Left;
+
+	//Виводжу цілу частину
+	uint8_t DIG3 = Left % 100 / 10;
+	uint8_t DIG4 = Left % 10;
+	this->Transmit(3, NUM[DIG3]);
+	this->Transmit(2, NUM[DIG4] | 0x80);
+
+	//Вивід дробної частини
+	int Right = 0;
+
+	Right = round(Drob * 100); // Округлюємо оскільки при діленні на число кратне 3 виникають небажані ефекти
+	DIG3 = (int) Right % 100 / 10;
+	DIG4 = (int) Right % 10;
+	this->Transmit(1, NUM[DIG3]);
+	this->Transmit(4, NUM[DIG4]);
+
+}
+
+void ControlModule::PrintChar(uint8_t rg, uint8_t dt) {
+	switch (rg) {
+	case 0:
+		this->Transmit(3, dt);
+		break;
+	case 1:
+		this->Transmit(2, dt);
+		break;
+	case 2:
+		this->Transmit(1, dt);
+		break;
+	case 3:
+		this->Transmit(4, dt);
+		break;
+	}
+
+}
+
+void ControlModule::SetBrightness(uint8_t Intensity) {
+	if (Intensity > 15)
+		Intensity = 15;
+	if (Intensity < 0)
+		Intensity = 0;
 	this->Transmit(0x0A, Intensity);
 
 }
