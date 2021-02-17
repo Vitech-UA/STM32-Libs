@@ -8,6 +8,8 @@
 #include "uart.h"
 #include "Gpio.h" // Для доступу до функції класу Gpio
 
+
+
 /* Ремапи для USART1 */
 #define USART1_PB6Tx_PB7Rx
 //#define USART1_PA9Tx_PA10Rx
@@ -16,16 +18,44 @@
 #define USART2_PA2Tx_PA3Rx
 //#define USART2_PA14Tx_PA15Rx
 
-Uart::Uart(USART_TypeDef *UartPort, uint32_t UsartBrrValue) {
+/* Підтримка кільцевого буфера */
+//#define UART_RX_BUFFER_SIZE 128 // Вказати максимальний розмір прийомного буфера
 
+
+Uart::Uart(USART_TypeDef *UartPort, uint32_t UsartBrrValue) {
 	this->ItemUsart = UartPort;
 	this->ItemUsartBrrValue = UsartBrrValue;
-
 	this->InitGpio();
 	this->EnableClock(this->ItemUsart);
 	this->Init();
 }
 
+#ifdef USE_RINGBUFFER
+
+void Uart::RingBufferClear() {
+	__NVIC_DisableIRQ(USART1_IRQn);
+	this->rx_buffer_head = 0;
+	this->rx_buffer_tail = 0;
+	__NVIC_EnableIRQ(USART1_IRQn);
+}
+
+uint8_t Uart::ReadRingBuffer(void) {
+	if (this->rx_buffer_head == this->rx_buffer_tail) // Якщо буфер пустий, то повертаємо ЗЕРО
+			{
+		return 0;
+	} else {
+		uint8_t c = rx_buffer[this->rx_buffer_tail];
+		this->rx_buffer_tail =
+				(uint16_t) (this->rx_buffer_tail + 1) % UART_RING_BUFFER_SIZE;
+		return c;
+	}
+}
+
+uint16_t Uart::GetRingBufferSize(void) {
+	return ((uint16_t) (UART_RING_BUFFER_SIZE + this->rx_buffer_head - this->rx_buffer_tail))
+			% UART_RING_BUFFER_SIZE;
+}
+#endif
 void Uart::InitGpio(void) {
 // Взалежності від того, який USART обрано його й ініціалізуємо
 	if (this->ItemUsart == USART1) {

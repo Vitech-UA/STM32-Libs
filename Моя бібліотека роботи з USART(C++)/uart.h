@@ -10,10 +10,14 @@
 
 #define HCLK 48000000U
 
+#define USE_RINGBUFFER // Розкоментувати для підключення кільцевого буфера
+
+#define UART_RING_BUFFER_SIZE 128  // Максимальний розмір прийомного буфера
+
+
 /* Прототипи обробників переривань. Реалізацію необхідно дописати власноруч */
 extern "C" void USART1_IRQHandler(void);
 extern "C" void USART2_IRQHandler(void);
-
 
 class Uart {
 
@@ -24,7 +28,14 @@ public:
 	uint8_t ReceiveByte(void);
 	void EnableTxInterrupt(void);
 	void EnableRxInterrupt(void);
-    void ResetRxCompleteFlag(void);
+	void ResetRxCompleteFlag(void);
+	void RingBufferClear();
+	uint16_t GetRingBufferSize(void);
+	uint8_t ReadRingBuffer(void);
+	//RingBuffer
+	volatile uint16_t rx_buffer_head = 0;
+	volatile uint16_t rx_buffer_tail = 0;
+	uint8_t rx_buffer[UART_RING_BUFFER_SIZE] = { 0, };
 
 private:
 	void InitGpio(void);
@@ -32,6 +43,7 @@ private:
 	void Init(void);
 	USART_TypeDef *ItemUsart;
 	uint32_t ItemUsartBrrValue;
+
 };
 
 #endif /* UART_H_ */
