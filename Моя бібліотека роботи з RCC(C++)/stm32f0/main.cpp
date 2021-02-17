@@ -32,7 +32,7 @@ void del(int delay) {
 
 int main(void) {
 
-	Clock RCC_B; // Об'єкт класа Clock
+	Rcc RCC_MODULE = Rcc(HCLK_48MHz); // Об'єкт класа Clock
 
 	MCO MCO_Out; // Об'єкт класа MCO
 	Gpio mco_pin = Gpio(GPIOA, 8);
