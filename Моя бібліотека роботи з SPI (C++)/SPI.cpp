@@ -5,40 +5,23 @@
  *      Author: Embed Viktor
  */
 
-#include <SPI.h>
+#include "SPI.h"
+
 
 SPI::SPI(SPI_TypeDef *Port, SPI_mode_t Mode) {
-	// TODO Допиляти цей конструктор
-	this->SPI_Item = Port;
 
-	switch (Mode) {
-	case Full_Duplex_Master:
+	this->MISO_PORT = GPIOA;
+	this->MISO_PIN = 6;
 
-		break;
-	case Full_Duplex_Slave:
+	this->MOSI_PORT = GPIOA;
+	this->MISO_PIN = 7;
 
-		break;
-	case Half_Duplex_Master:
+	this->SCK_PORT = GPIOA;
+	this->SCK_PIN = 5;
 
-		break;
-	case Half_Duplex_Slave:
+}
 
-		break;
-	case Transmit_Only_Master:
-
-		break;
-	case Transmit_Only_Slave:
-
-		break;
-	case Receive_Only_Master:
-
-		break;
-	case Receive_Only_Slave:
-
-		break;
-	default:
-		break;
-	}
+void SPI::InitGpio() {
 
 }
 
