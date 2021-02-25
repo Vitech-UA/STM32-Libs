@@ -2,7 +2,7 @@
  * ControlModule.h
  *
  *  Created on: Jan 23, 2021
- *      Author: Embed Viktor
+ *  Author: Embed Viktor
  */
 
 #ifndef CONTROLMODULE_H_
@@ -10,25 +10,8 @@
 
 #include "stm32f051x8.h"
 #include <stdbool.h>
+#include <SPI.h>
 
-typedef enum AF {
-	AF0,
-	AF1,
-	AF2,
-	AF3,
-	AF4,
-	AF5,
-	AF6,
-	AF7,
-	AF8,
-	AF9,
-	AF10,
-	AF11,
-	AF12,
-	AF13,
-	AF14,
-	AF15
-} AF_t;
 
 typedef enum LED_STATE {
 	LED_ON, LED_OFF
@@ -53,35 +36,20 @@ typedef enum BUZZER_STATE {
 
 /*Функції-утиліти*/
 void GpioEnableClk(GPIO_TypeDef *PORT);
-void GpioSetAsAF(GPIO_TypeDef *PORT, uint16_t gpio_pin, AF_t AF);
 
 /*Інтерфейс бібліотеки*/
-class ControlModule {
+class ControlModule : public SPI {
 public:
-	ControlModule();
+	ControlModule(SPI_TypeDef *Port);
 	void Init();
 	void Clear(void);
 	void PrintInt(volatile uint16_t number);
 	void PrintFloat(float number);
 	void SetBrightness(uint8_t Intensity);
 	void PrintChar(uint8_t rg, uint8_t dt);
-	void Transmit(uint8_t rg, uint8_t dt); /*Перенести у приват*/
+	void Transmit(uint8_t rg, uint8_t dt); // TODO: Перенести у приват
 private:
-	void nCS_LOW(void);
-	void nCS_HIGH(void);
-
 	void ConfigMAX7219(SPI_TypeDef *SPI_PORT);
-	void ConfigGPIO(GPIO_TypeDef *clk_port, uint16_t clk_pin,
-			GPIO_TypeDef *din_port, uint16_t din_pin, GPIO_TypeDef *load_port,
-			uint16_t load_pin);
-
-	GPIO_TypeDef *CLK_PORT;
-	uint16_t CLK_PIN;
-	GPIO_TypeDef *DIN_PORT;
-	uint16_t DIN_PIN;
-	GPIO_TypeDef *LOAD_PORT;
-	uint16_t LOAD_PIN;
-    SPI_TypeDef *SPI_ITEM;
 	uint8_t aTxBuf[1]={0};
 	char dg=4;
 };
