@@ -1,0 +1,58 @@
+core_cm0.h:623:22:void __NVIC_EnableIRQ(IRQn_Type)	16	static
+core_cm0.h:659:22:void __NVIC_DisableIRQ(IRQn_Type)	16	static,ignoring_inline_asm
+core_cm0.h:730:22:void __NVIC_SetPriority(IRQn_Type, uint32_t)	24	static
+Gpio.cpp:11:1:Gpio::Gpio(GPIO_TypeDef*, uint16_t)	24	static
+Gpio.cpp:18:6:void Gpio::GpioEnableClk()	24	static
+Gpio.cpp:41:6:void Gpio::GpioSetOutputType(OUTPUT_TYPE_t)	16	static
+Gpio.cpp:44:6:void Gpio::GpioSetOutputSpeed(OUT_SPEED_t)	16	static
+Gpio.cpp:48:6:void Gpio::Set()	16	static
+Gpio.cpp:51:6:void Gpio::Reset()	16	static
+Gpio.cpp:54:6:void Gpio::Toggle()	16	static
+Gpio.cpp:57:6:void Gpio::SetAsAF(GPIO_AF_t)	16	static
+Gpio.cpp:75:6:void Gpio::SetAsAF(GPIO_AF_t, OUTPUT_TYPE_t)	16	static
+Gpio.cpp:94:6:void Gpio::SetAsGenerapPurporseOutput(OUTPUT_TYPE_t)	16	static
+Gpio.cpp:98:6:void Gpio::SetAsInput(GPIO_PU_PD_t)	16	static
+Gpio.cpp:104:6:void Gpio::Deinit()	16	static
+Gpio.cpp:111:6:bool Gpio::IsSet()	24	static
+RFM69.cpp:10:1:RFM69::RFM69(SPI_TypeDef*, GPIO_TypeDef*, uint16_t, GPIO_TypeDef*, uint16_t)	24	static
+RFM69.cpp:23:6:void RFM69::WriteReg(uint8_t, uint8_t)	16	static
+uart.cpp:25:1:Uart::Uart(USART_TypeDef*, uint32_t)	24	static
+uart.cpp:35:6:void Uart::RingBufferClear()	16	static
+uart.cpp:42:9:uint8_t Uart::ReadRingBuffer()	24	static
+uart.cpp:54:10:uint16_t Uart::GetRingBufferSize()	16	static
+uart.cpp:59:6:void Uart::InitGpio()	56	static
+uart.cpp:110:6:void Uart::EnableClock(USART_TypeDef*)	16	static
+uart.cpp:127:6:void Uart::Init()	24	static
+uart.cpp:152:9:uint8_t Uart::ReceiveByte()	16	static
+uart.cpp:156:6:void Uart::SendByte(uint8_t)	16	static
+uart.cpp:162:6:void Uart::SendString(char*)	24	static
+uart.cpp:170:6:void Uart::EnableTxInterrupt()	16	static
+uart.cpp:186:6:void Uart::EnableRxInterrupt()	16	static
+uart.cpp:201:6:void Uart::ResetRxCompleteFlag()	16	static
+SPI.cpp:12:1:SPI::SPI(SPI_TypeDef*)	16	static
+SPI.cpp:27:6:void SPI::Config()	16	static
+SPI.cpp:42:6:void SPI::InitGpio()	56	static
+SPI.cpp:70:6:void SPI::EnableClk()	16	static
+SPI.cpp:79:6:void SPI::SetFrameSize(SPI_DataSize_t)	16	static
+SPI.cpp:88:6:void SPI::SetClockPrsc(SetClockPrsc_t)	16	static
+SPI.cpp:92:6:void SPI::EnableSoftwareSlaveManagment()	16	static
+SPI.cpp:97:6:void SPI::DisableSoftwareSlaveManagment()	16	static
+SPI.cpp:101:6:void SPI::EnableMotorollaMode()	16	static
+SPI.cpp:105:6:void SPI::nCS_Low()	16	static
+SPI.cpp:109:6:void SPI::nCS_High()	16	static
+SPI.cpp:113:6:void SPI::Enable()	16	static
+SPI.cpp:117:6:void SPI::Disable()	16	static
+SPI.cpp:121:6:void SPI::SetClockPolarity(ClockPol_t)	16	static
+SPI.cpp:132:6:void SPI::SetClockPhase(ClockPhase_t)	16	static
+SPI.cpp:142:6:void SPI::SetMsbLsbFirst(MSB_LSB_First_t)	16	static
+SPI.cpp:151:6:void SPI::WriteReg(uint8_t, uint8_t)	16	static
+SPI.cpp:160:6:void SPI::TransmitBlocking(uint8_t*, uint16_t)	24	static
+SPI.cpp:166:6:void SPI::ReceiveBlocking(uint16_t*, uint16_t)	24	static
+SPI.cpp:173:10:uint16_t SPI::Receive()	16	static
+SPI.cpp:185:6:void SPI::EnableIRQ()	16	static
+SPI.cpp:193:10:uint16_t SPI::TransmitReceive16B(uint16_t)	16	static
+SPI.cpp:202:9:uint8_t SPI::TransmitReceive8B(uint8_t)	16	static
+main.cpp:34:5:int main()	120	static
+main.cpp:58:6:void Delay(uint32_t)	24	static
+main.cpp:62:1:void __static_initialization_and_destruction_0(int, int)	16	static
+main.cpp:62:1:cpp)	8	static

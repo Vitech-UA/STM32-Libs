@@ -1,0 +1,8 @@
+main.c:67:5:main	16	static
+main.c:123:6:SystemClock_Config	72	static
+main.c:159:13:MX_SPI1_Init	8	static
+main.c:198:13:MX_GPIO_Init	16	static
+main.c:208:6:SendTestData	16	static
+main.c:217:10:SpiSlaveTransfer16B	24	static
+main.c:228:9:SpiSlaveTransfer8B	24	static
+main.c:244:6:Error_Handler	4	static,ignoring_inline_asm
