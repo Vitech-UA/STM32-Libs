@@ -83,7 +83,11 @@ public:
 	SPI(SPI_TypeDef *Port);
 	void nCS_Low();
 	void nCS_High();
-
+	void ReceiveBlocking(uint16_t * buffer, uint16_t n);
+	uint16_t Receive(void);
+	void EnableIRQ(void);
+	uint16_t TransmitReceive16B(uint16_t TxData);
+	uint8_t TransmitReceive8B(uint8_t TxData);
 private:
 
 	void Config();
@@ -100,7 +104,12 @@ private:
     void SetClockPhase(ClockPhase_t);
     void SetMsbLsbFirst(MSB_LSB_First_t);
 
+
 protected:
+    void WriteReg(uint8_t rg, uint8_t dt);
+    void TransmitBlocking(uint8_t * buffer, uint16_t n);
+
+
 	SPI_TypeDef *SPI_ITEM;
 	GPIO_TypeDef *MOSI_PORT;
 	uint16_t MOSI_PIN;
