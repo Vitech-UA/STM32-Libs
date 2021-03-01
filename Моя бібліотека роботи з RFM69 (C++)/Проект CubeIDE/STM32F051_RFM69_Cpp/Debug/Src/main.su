@@ -1,0 +1,98 @@
+core_cm0.h:623:22:void __NVIC_EnableIRQ(IRQn_Type)	16	static
+core_cm0.h:659:22:void __NVIC_DisableIRQ(IRQn_Type)	16	static,ignoring_inline_asm
+core_cm0.h:730:22:void __NVIC_SetPriority(IRQn_Type, uint32_t)	24	static
+core_cm0.h:920:26:uint32_t SysTick_Config(uint32_t)	16	static
+Gpio.cpp:11:1:Gpio::Gpio(GPIO_TypeDef*, uint16_t)	24	static
+Gpio.cpp:18:6:void Gpio::GpioEnableClk()	24	static
+Gpio.cpp:41:6:void Gpio::GpioSetOutputType(OUTPUT_TYPE_t)	16	static
+Gpio.cpp:44:6:void Gpio::GpioSetOutputSpeed(OUT_SPEED_t)	16	static
+Gpio.cpp:48:6:void Gpio::Set()	16	static
+Gpio.cpp:51:6:void Gpio::Reset()	16	static
+Gpio.cpp:54:6:void Gpio::Toggle()	16	static
+Gpio.cpp:57:6:void Gpio::SetAsAF(GPIO_AF_t)	16	static
+Gpio.cpp:75:6:void Gpio::SetAsAF(GPIO_AF_t, OUTPUT_TYPE_t)	16	static
+Gpio.cpp:94:6:void Gpio::SetAsGenerapPurporseOutput(OUTPUT_TYPE_t)	16	static
+Gpio.cpp:98:6:void Gpio::SetAsInput(GPIO_PU_PD_t)	16	static
+Gpio.cpp:104:6:void Gpio::Deinit()	16	static
+Gpio.cpp:111:6:bool Gpio::IsSet()	24	static
+RFM69.cpp:50:1:RFM69::RFM69(SPI_TypeDef*, GPIO_TypeDef*, uint16_t, bool, SPI_DataSize_t)	24	static
+RFM69.cpp:74:6:void chipSelect()	8	static
+RFM69.cpp:77:6:void chipUnselect()	8	static
+RFM69.cpp:80:5:int RFM69::getRSSI()	16	static
+RFM69.cpp:83:6:void RFM69::setAutoreadRSSI(bool)	16	static
+RFM69.cpp:86:6:void RFM69::setCSMA(bool)	16	static
+RFM69.cpp:90:6:void RFM69::reset()	16	static
+RFM69.cpp:107:6:bool RFM69::init()	16	static
+RFM69.cpp:122:6:void RFM69::setFrequency(unsigned int)	24	static
+RFM69.cpp:136:6:void RFM69::setFrequencyDerivation(unsigned int)	24	static
+RFM69.cpp:149:6:void RFM69::setBitRate(unsigned int)	16	static
+RFM69.cpp:162:9:uint8_t RFM69::readRegister(uint8_t)	24	static
+RFM69.cpp:172:6:void RFM69::writeRegister(uint8_t, uint8_t)	24	static
+RFM69.cpp:190:6:void RFM69::chipSelect()	16	static
+RFM69.cpp:195:6:void RFM69::chipUnselect()	16	static
+RFM69.cpp:200:11:RFM69Mode RFM69::setMode(RFM69Mode)	16	static
+RFM69.cpp:232:6:void RFM69::setPASettings(uint8_t)	24	static
+RFM69.cpp:265:6:void RFM69::setPowerLevel(uint8_t)	16	static
+RFM69.cpp:274:6:void RFM69::setHighPowerSettings(bool)	16	static
+RFM69.cpp:283:6:void RFM69::setCustomConfig(const uint8_t (*)[2], unsigned int)	32	static
+RFM69.cpp:289:6:void RFM69::clearFIFO()	16	static
+RFM69.cpp:294:6:void RFM69::waitForModeReady()	24	static
+RFM69.cpp:301:6:void RFM69::sleep()	16	static
+RFM69.cpp:305:5:int RFM69::receive(char*, unsigned int)	32	static
+RFM69.cpp:323:5:int RFM69::_receive(char*, unsigned int)	40	static
+RFM69.cpp:360:6:bool RFM69::setAESEncryption(const void*, unsigned int)	32	static
+RFM69.cpp:392:6:void RFM69::waitForPacketSent()	24	static
+RFM69.cpp:399:6:void RFM69::continuousBit(bool)	16	static
+RFM69.cpp:413:5:int RFM69::readRSSI()	16	static
+RFM69.cpp:419:6:void RFM69::dumpRegisters()	120	static
+RFM69.cpp:430:6:void RFM69::setOOKMode(bool)	16	static
+RFM69.cpp:446:6:void RFM69::setDataMode(RFM69DataMode)	16	static
+RFM69.cpp:475:5:int RFM69::setPowerDBm(int8_t)	24	static
+RFM69.cpp:532:6:bool RFM69::channelFree()	16	static
+RFM69.cpp:540:9:uint8_t RFM69::TransmitReceive8B(uint8_t)	24	static
+RFM69.cpp:554:5:int RFM69::send(const void*, unsigned int)	40	static
+RFM69.cpp:641:6:void RFM69::SetResetPin(GPIO_TypeDef*, uint16_t)	40	static
+uart.cpp:25:1:Uart::Uart(USART_TypeDef*, uint32_t)	24	static
+uart.cpp:35:6:void Uart::RingBufferClear()	16	static
+uart.cpp:42:9:uint8_t Uart::ReadRingBuffer()	24	static
+uart.cpp:54:10:uint16_t Uart::GetRingBufferSize()	16	static
+uart.cpp:59:6:void Uart::InitGpio()	56	static
+uart.cpp:110:6:void Uart::EnableClock(USART_TypeDef*)	16	static
+uart.cpp:127:6:void Uart::Init()	24	static
+uart.cpp:152:9:uint8_t Uart::ReceiveByte()	16	static
+uart.cpp:156:6:void Uart::SendByte(uint8_t)	16	static
+uart.cpp:162:6:void Uart::SendString(char*)	24	static
+uart.cpp:169:6:void Uart::SendString(uint8_t*)	24	static
+uart.cpp:174:6:void Uart::EnableTxInterrupt()	16	static
+uart.cpp:190:6:void Uart::EnableRxInterrupt()	16	static
+uart.cpp:205:6:void Uart::ResetRxCompleteFlag()	16	static
+SPI.cpp:16:1:SPI::SPI(SPI_TypeDef*, SPI_DataSize_t)	24	static
+SPI.cpp:41:6:void SPI::Config()	16	static
+SPI.cpp:57:6:void SPI::InitGpio()	56	static
+SPI.cpp:86:6:void SPI::EnableClk()	16	static
+SPI.cpp:95:6:void SPI::SetFrameSize(SPI_DataSize_t)	16	static
+SPI.cpp:104:6:void SPI::SetClockPrsc(SetClockPrsc_t)	16	static
+SPI.cpp:108:6:void SPI::EnableSoftwareSlaveManagment()	16	static
+SPI.cpp:113:6:void SPI::DisableSoftwareSlaveManagment()	16	static
+SPI.cpp:117:6:void SPI::EnableMotorollaMode()	16	static
+SPI.cpp:121:6:void SPI::nCS_Low()	16	static
+SPI.cpp:125:6:void SPI::nCS_High()	16	static
+SPI.cpp:129:6:void SPI::Enable()	16	static
+SPI.cpp:133:6:void SPI::Disable()	16	static
+SPI.cpp:137:6:void SPI::SetClockPolarity(ClockPol_t)	16	static
+SPI.cpp:148:6:void SPI::SetClockPhase(ClockPhase_t)	16	static
+SPI.cpp:158:6:void SPI::SetMsbLsbFirst(MSB_LSB_First_t)	16	static
+SPI.cpp:167:6:void SPI::WriteReg(uint8_t, uint8_t)	16	static
+SPI.cpp:176:6:void SPI::TransmitBlocking(uint8_t)	24	static
+SPI.cpp:190:6:void SPI::ReceiveBlocking(uint16_t*, uint16_t)	24	static
+SPI.cpp:197:10:uint16_t SPI::Receive()	16	static
+SPI.cpp:208:6:void SPI::EnableIRQ()	16	static
+SPI.cpp:216:10:uint16_t SPI::TransmitReceive16B(uint16_t)	16	static
+SPI.cpp:225:9:uint8_t SPI::TransmitReceive8B(uint8_t)	24	static
+main.cpp:33:5:int main()	192	static
+main.cpp:61:17:void SysTick_Handler()	8	static
+main.cpp:69:6:void delay_ms(unsigned int)	24	static
+main.cpp:76:6:void mstimer_init()	8	static
+main.cpp:84:10:uint32_t mstimer_get()	8	static
+main.cpp:86:1:void __static_initialization_and_destruction_0(int, int)	16	static
+main.cpp:86:1:cpp)	8	static
