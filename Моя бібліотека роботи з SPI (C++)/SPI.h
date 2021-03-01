@@ -45,17 +45,15 @@ typedef enum SPI_mode {
 	Transmit_Only_Slave
 } SPI_mode_t;
 
-typedef enum SPI_DataSize{
-	DataSize_8B =0,
-	DataSize_16B
-}SPI_DataSize_t;
+typedef enum SPI_DataSize {
+	DataSize_8B = 0, DataSize_16B
+} SPI_DataSize_t;
 
-typedef enum MSB_LSB_First{
-	LSB_First =0,
-	MSB_First
-}MSB_LSB_First_t;
+typedef enum MSB_LSB_First {
+	LSB_First = 0, MSB_First
+} MSB_LSB_First_t;
 
-typedef enum SetClockPrsc{
+typedef enum SetClockPrsc {
 
 	fPCLK_DIV_By_2 = 0,
 	fPCLK_DIV_By_4,
@@ -66,28 +64,25 @@ typedef enum SetClockPrsc{
 	fPCLK_DIV_By_128,
 	fPCLK_DIV_By_256
 
-}SetClockPrsc_t;
+} SetClockPrsc_t;
 
-typedef enum ClockPol{
-CPOL1=0,
-CPOL0
-}ClockPol_t;
+typedef enum ClockPol {
+	CPOL1 = 0, CPOL0
+} ClockPol_t;
 
-typedef enum ClockPhase{
-CPHA1=0,
-CPHA0
-}ClockPhase_t;
+typedef enum ClockPhase {
+	CPHA1 = 0, CPHA0
+} ClockPhase_t;
 
 class SPI {
 public:
-	SPI(SPI_TypeDef *Port);
+	SPI(SPI_TypeDef *Port, SPI_DataSize_t size);
 	void nCS_Low();
 	void nCS_High();
-	void ReceiveBlocking(uint16_t * buffer, uint16_t n);
+	void ReceiveBlocking(uint16_t *buffer, uint16_t n);
 	uint16_t Receive(void);
 	void EnableIRQ(void);
-	uint16_t TransmitReceive16B(uint16_t TxData);
-	uint8_t TransmitReceive8B(uint8_t TxData);
+	void TransmitBlocking(uint8_t buffer);
 private:
 
 	void Config();
@@ -97,19 +92,17 @@ private:
 	void SetClockPrsc(SetClockPrsc_t);
 	void EnableSoftwareSlaveManagment(void);
 	void DisableSoftwareSlaveManagment(void);
-    void EnableMotorollaMode(void);
-    void Enable(void);
-    void Disable(void);
-    void SetClockPolarity(ClockPol_t);
-    void SetClockPhase(ClockPhase_t);
-    void SetMsbLsbFirst(MSB_LSB_First_t);
-
+	void EnableMotorollaMode(void);
+	void Enable(void);
+	void Disable(void);
+	void SetClockPolarity(ClockPol_t);
+	void SetClockPhase(ClockPhase_t);
+	void SetMsbLsbFirst(MSB_LSB_First_t);
 
 protected:
-    void WriteReg(uint8_t rg, uint8_t dt);
-    void TransmitBlocking(uint8_t * buffer, uint16_t n);
-
-
+	uint16_t TransmitReceive16B(uint16_t TxData);
+	uint8_t TransmitReceive8B(uint8_t TxData);
+	void WriteReg(uint8_t rg, uint8_t dt);
 	SPI_TypeDef *SPI_ITEM;
 	GPIO_TypeDef *MOSI_PORT;
 	uint16_t MOSI_PIN;
@@ -119,6 +112,7 @@ protected:
 	uint16_t SCK_PIN;
 	GPIO_TypeDef *nSC_PORT;
 	uint16_t nSC_PIN;
+	SPI_DataSize_t _dataSize;
 };
 
 #endif /* SPI_H_ */

@@ -6,19 +6,33 @@
  */
 
 #include "SPI.h"
+#include "stm32f0xx.h"
+
+#define SPI1_DR_8bit          (*(__IO uint8_t *)((uint32_t)&(SPI1->DR)))
+#define SPI2_DR_8bit          (*(__IO uint8_t *)((uint32_t)&(SPI2->DR)))
 
 extern "C" void SPI1_IRQHandler();
 
-SPI::SPI(SPI_TypeDef *Port) {
+SPI::SPI(SPI_TypeDef *Port, SPI_DataSize_t size) {
+
+	this->_dataSize = size;
 	this->SPI_ITEM = Port;
+
 	this->InitGpio();
 	this->EnableClk();
 	this->SetClockPrsc(fPCLK_DIV_By_2);
 	this->EnableSoftwareSlaveManagment();
 	this->EnableMotorollaMode();
 	this->Config();
-	this->SetFrameSize(DataSize_16B);
-	//this->SetFrameSize(DataSize_8B);
+
+	if (this->_dataSize == DataSize_16B) {
+		this->SetFrameSize(DataSize_16B);
+	}
+	if (this->_dataSize == DataSize_8B) {
+		this->SetFrameSize(DataSize_8B);
+		this->SPI_ITEM->CR2 |= SPI_CR2_FRXTH; //Подія RXNE генерується, якщо рівень FIFO більше або дорівнює 1/4 (8-біт)
+	}
+
 	this->SetClockPhase(CPHA0);
 	this->SetClockPolarity(CPOL0);
 	this->SetMsbLsbFirst(MSB_First);
@@ -37,6 +51,7 @@ void SPI::Config() {
 											   // 0: Slave configuration
 
 	this->SPI_ITEM->CR2 &= ~SPI_CR2_DS;       // Clear bitfield
+
 }
 
 void SPI::InitGpio(void) {
@@ -47,8 +62,8 @@ void SPI::InitGpio(void) {
 	this->MOSI_PORT = GPIOB;
 	this->MOSI_PIN = 5;
 
-	this->SCK_PORT = GPIOA;
-	this->SCK_PIN = 5;
+	this->SCK_PORT = GPIOB;
+	this->SCK_PIN = 3;
 
 	this->nSC_PORT = GPIOC;
 	this->nSC_PIN = 4;
@@ -65,6 +80,7 @@ void SPI::InitGpio(void) {
 
 	Gpio nCS = Gpio(this->nSC_PORT, this->nSC_PIN);
 	nCS.SetAsGenerapPurporseOutput(OUTPUT_PP);
+	this->nCS_High();
 }
 
 void SPI::EnableClk(void) {
@@ -131,7 +147,7 @@ void SPI::SetClockPolarity(ClockPol_t cpol) {
 
 void SPI::SetClockPhase(ClockPhase_t cpha) {
 	if (cpha = CPHA1) {
-		this->SPI_ITEM->CR1 |= SPI_CR1_CPHA;    // Phase clc signal    CPHA = 0;
+		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPHA;   // Phase clc signal    CPHA = 0;
 	}
 	if (cpha = CPHA0) {
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPHA;   // Phase clc signal    CPHA = 0;
@@ -157,9 +173,17 @@ void SPI::WriteReg(uint8_t rg, uint8_t dt) {
 	this->nCS_High();
 }
 
-void SPI::TransmitBlocking(uint8_t *buffer, uint16_t n) {
-	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0) {
-		this->SPI_ITEM->DR = *buffer++;
+void SPI::TransmitBlocking(uint8_t buffer) {
+
+	if (this->_dataSize == DataSize_8B) {
+
+	}
+	if (this->_dataSize == DataSize_16B) {
+		uint16_t RxData = (buffer << 8);
+		this->nCS_Low();
+		while (!(this->SPI_ITEM->SR & SPI_SR_TXE)); // Очікую спустошення передавального буфера.
+		this->SPI_ITEM->DR =(uint16_t) RxData;
+		this->nCS_Low();
 	}
 
 }
@@ -171,8 +195,7 @@ void SPI::ReceiveBlocking(uint16_t *buffer, uint16_t n) {
 }
 
 uint16_t SPI::Receive(void) {
-	//SPI1->DR = 0; //запускаем обмен
-
+	SPI1->DR = 0;
 	//Ждем, пока не появится новое значение
 	//в буфере приемника
 	while (!(SPI1->SR & SPI_SR_RXNE))
@@ -183,10 +206,10 @@ uint16_t SPI::Receive(void) {
 }
 
 void SPI::EnableIRQ(void) {
-	this->SPI_ITEM->CR2 |= SPI_CR2_RXNEIE; // Tx buffer empty interrupt enable
+	//this->SPI_ITEM->CR2 |= SPI_CR2_RXNEIE; // Tx buffer empty interrupt enable
 	//this->SPI_ITEM->CR2 |= SPI_CR2_TXEIE;  // RX buffer not empty interrupt enable
 	//this->SPI_ITEM->CR2 |= SPI_CR2_ERRIE;  // Error interrupt enable
-	NVIC_EnableIRQ(SPI1_IRQn);
+	//NVIC_EnableIRQ(SPI1_IRQn);
 
 }
 
@@ -194,16 +217,18 @@ uint16_t SPI::TransmitReceive16B(uint16_t TxData) {
 	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0) {
 	} // Очікую спустошення передавального буфера.
 	this->SPI_ITEM->DR = (uint16_t) TxData;
-	if((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0) {
-	}// Очікую заповнення приймального буфера.
+	if ((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0) {
+	} // Очікую заповнення приймального буфера.
 	return this->SPI_ITEM->DR;
 }
 
 uint8_t SPI::TransmitReceive8B(uint8_t TxData) {
+	uint8_t RxData;
 	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0) {
 	} // Очікую спустошення передавального буфера.
-	this->SPI_ITEM->DR = (uint8_t) TxData;
-	if((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0) {
-	}// Очікую заповнення приймального буфера.
-	return this->SPI_ITEM->DR;
+	SPI1_DR_8bit = (uint8_t) TxData;
+	if ((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0) {
+	} // Очікую заповнення приймального буфера.
+	RxData = SPI1_DR_8bit;
+	return RxData;
 }
