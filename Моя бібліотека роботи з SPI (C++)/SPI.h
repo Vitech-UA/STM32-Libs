@@ -80,7 +80,7 @@ public:
 	void nCS_Low();
 	void nCS_High();
 	void ReceiveBlocking(uint16_t *buffer, uint16_t n);
-	uint16_t Receive(void);
+	uint8_t Receive(void);
 	void EnableIRQ(void);
 	void TransmitBlocking(uint8_t buffer);
 private:
@@ -103,6 +103,7 @@ protected:
 	uint16_t TransmitReceive16B(uint16_t TxData);
 	uint8_t TransmitReceive8B(uint8_t TxData);
 	void WriteReg(uint8_t rg, uint8_t dt);
+	uint8_t transfer(uint8_t data);
 	SPI_TypeDef *SPI_ITEM;
 	GPIO_TypeDef *MOSI_PORT;
 	uint16_t MOSI_PIN;
