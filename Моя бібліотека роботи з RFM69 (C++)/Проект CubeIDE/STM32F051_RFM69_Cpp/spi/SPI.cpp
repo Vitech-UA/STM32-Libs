@@ -13,7 +13,8 @@
 
 extern "C" void SPI1_IRQHandler();
 
-SPI::SPI(SPI_TypeDef *Port, SPI_DataSize_t size) {
+SPI::SPI(SPI_TypeDef *Port, SPI_DataSize_t size)
+{
 
 	this->_dataSize = size;
 	this->SPI_ITEM = Port;
@@ -25,10 +26,12 @@ SPI::SPI(SPI_TypeDef *Port, SPI_DataSize_t size) {
 	this->EnableMotorollaMode();
 	this->Config();
 
-	if (this->_dataSize == DataSize_16B) {
+	if (this->_dataSize == DataSize_16B)
+	{
 		this->SetFrameSize(DataSize_16B);
 	}
-	if (this->_dataSize == DataSize_8B) {
+	if (this->_dataSize == DataSize_8B)
+	{
 		this->SetFrameSize(DataSize_8B);
 		this->SPI_ITEM->CR2 |= SPI_CR2_FRXTH; //Подія RXNE генерується, якщо рівень FIFO більше або дорівнює 1/4 (8-біт)
 	}
@@ -38,7 +41,8 @@ SPI::SPI(SPI_TypeDef *Port, SPI_DataSize_t size) {
 	this->SetMsbLsbFirst(MSB_First);
 	this->Enable();
 }
-void SPI::Config() {
+void SPI::Config()
+{
 	//TODO: Повиносити звідси строки в окремі ф-ї елементи
 
 	//this->SPI_ITEM->CR1 |= SPI_CR1_BIDIMODE; // 0: 2-проводной режим роботи з однонаправленою передачею по лініях даних
@@ -54,7 +58,8 @@ void SPI::Config() {
 
 }
 
-void SPI::InitGpio(void) {
+void SPI::InitGpio(void)
+{
 	// Визначення GPIO
 	this->MISO_PORT = GPIOA;
 	this->MISO_PIN = 6;
@@ -83,129 +88,168 @@ void SPI::InitGpio(void) {
 	this->nCS_High();
 }
 
-void SPI::EnableClk(void) {
-	if (this->SPI_ITEM == SPI1) {
+void SPI::EnableClk(void)
+{
+	if (this->SPI_ITEM == SPI1)
+	{
 		RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 	}
-	if (this->SPI_ITEM == SPI2) {
+	if (this->SPI_ITEM == SPI2)
+	{
 		RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
 	}
 }
 
-void SPI::SetFrameSize(SPI_DataSize_t Size) {
-	if (Size == DataSize_8B) {
+void SPI::SetFrameSize(SPI_DataSize_t Size)
+{
+	if (Size == DataSize_8B)
+	{
 		this->SPI_ITEM->CR2 |= 0x07 << SPI_CR2_DS_Pos; // 8 Bit frame
 	}
-	if (Size == DataSize_16B) {
+	if (Size == DataSize_16B)
+	{
 		this->SPI_ITEM->CR2 |= (0x0F << SPI_CR2_DS_Pos); // 16 Bit frame
 	}
 }
 
-void SPI::SetClockPrsc(SetClockPrsc_t Prescaler) {
+void SPI::SetClockPrsc(SetClockPrsc_t Prescaler)
+{
 	this->SPI_ITEM->CR1 |= (Prescaler << SPI_CR1_BR_Pos);
 }
 
-void SPI::EnableSoftwareSlaveManagment(void) {
+void SPI::EnableSoftwareSlaveManagment(void)
+{
 	this->SPI_ITEM->CR1 |= SPI_CR1_SSM;  // 1: Software slave management enabled
 	this->SPI_ITEM->CR1 |= SPI_CR1_SSI;  // 1: Internal slave select
 }
 
-void SPI::DisableSoftwareSlaveManagment(void) {
+void SPI::DisableSoftwareSlaveManagment(void)
+{
 	this->SPI_ITEM->CR1 &= ~SPI_CR1_SSM; // 1: Software slave management disabled
 }
 
-void SPI::EnableMotorollaMode(void) {
+void SPI::EnableMotorollaMode(void)
+{
 	this->SPI_ITEM->CR2 &= ~SPI_CR2_FRF;      // Motorolla mode
 }
 
-void SPI::nCS_Low(void) {
+void SPI::nCS_Low(void)
+{
 	this->nSC_PORT->BSRR |= ((1 << this->nSC_PIN) << 16U); // BIT RESET
 }
 
-void SPI::nCS_High(void) {
+void SPI::nCS_High(void)
+{
 	this->nSC_PORT->BSRR |= (1 << this->nSC_PIN); // BIT SET
 }
 
-void SPI::Enable(void) {
+void SPI::Enable(void)
+{
 	this->SPI_ITEM->CR1 |= SPI_CR1_SPE;
 }
 
-void SPI::Disable(void) {
+void SPI::Disable(void)
+{
 	this->SPI_ITEM->CR1 &= ~SPI_CR1_SPE;
 }
 
-void SPI::SetClockPolarity(ClockPol_t cpol) {
+void SPI::SetClockPolarity(ClockPol_t cpol)
+{
 
-	if (cpol = CPOL1) {
+	if (cpol = CPOL1)
+	{
 		this->SPI_ITEM->CR1 |= SPI_CR1_CPOL;    // Polarity clc signal CPOL = 1;
 	}
-	if (cpol = CPOL0) {
+	if (cpol = CPOL0)
+	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPOL;   // Polarity clc signal CPOL = 0;
 	}
 
 }
 
-void SPI::SetClockPhase(ClockPhase_t cpha) {
-	if (cpha = CPHA1) {
+void SPI::SetClockPhase(ClockPhase_t cpha)
+{
+	if (cpha = CPHA1)
+	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPHA;   // Phase clc signal    CPHA = 0;
 	}
-	if (cpha = CPHA0) {
+	if (cpha = CPHA0)
+	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPHA;   // Phase clc signal    CPHA = 0;
 	}
 
 }
 
-void SPI::SetMsbLsbFirst(MSB_LSB_First_t msb_lsb_first) {
-	if (msb_lsb_first == MSB_First) {
+void SPI::SetMsbLsbFirst(MSB_LSB_First_t msb_lsb_first)
+{
+	if (msb_lsb_first == MSB_First)
+	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_LSBFIRST;
 	}
-	if (msb_lsb_first == LSB_First) {
+	if (msb_lsb_first == LSB_First)
+	{
 		this->SPI_ITEM->CR1 |= SPI_CR1_LSBFIRST;
 	}
 }
 
-void SPI::WriteReg(uint8_t rg, uint8_t dt) {
+uint8_t SPI::transfer(uint8_t data){
+	    //this->nCS_Low();
+		while (!(this->SPI_ITEM->SR & SPI_SR_TXE))
+			; // Очікую спустошення передавального буфера.
+		SPI1_DR_8bit = data;
 
-	this->nCS_Low();
-	this->SPI_ITEM->DR = (uint16_t) ((rg << 8) | dt);
-	while ((this->SPI_ITEM->SR & SPI_SR_BSY) == SPI_SR_BSY)
-		;
-	this->nCS_High();
+		while (!(this->SPI_ITEM->SR & SPI_SR_RXNE))
+			; // Очікую заповнення приймального буфера.
+		return (SPI1_DR_8bit);
+		//this->nCS_Low();
 }
 
-void SPI::TransmitBlocking(uint8_t buffer) {
 
-	if (this->_dataSize == DataSize_8B) {
+void SPI::TransmitBlocking(uint8_t buffer)
+{
+
+	if (this->_dataSize == DataSize_8B)
+	{
 
 	}
-	if (this->_dataSize == DataSize_16B) {
+	if (this->_dataSize == DataSize_16B)
+	{
 		uint16_t RxData = (buffer << 8);
 		this->nCS_Low();
-		while (!(this->SPI_ITEM->SR & SPI_SR_TXE)); // Очікую спустошення передавального буфера.
-		this->SPI_ITEM->DR =(uint16_t) RxData;
+		while (!(this->SPI_ITEM->SR & SPI_SR_TXE))
+			; // Очікую спустошення передавального буфера.
+		this->SPI_ITEM->DR = (uint16_t) RxData;
 		this->nCS_Low();
 	}
 
 }
-void SPI::ReceiveBlocking(uint16_t *buffer, uint16_t n) {
-	while (!(this->SPI_ITEM->SR & SPI_SR_RXNE)) {
+void SPI::ReceiveBlocking(uint16_t *buffer, uint16_t n)
+{
+	while (!(this->SPI_ITEM->SR & SPI_SR_RXNE))
+	{
 	}
 
 	*buffer++ = this->SPI_ITEM->DR;
 }
 
-uint16_t SPI::Receive(void) {
-	SPI1->DR = 0;
-	//Ждем, пока не появится новое значение
-	//в буфере приемника
-	while (!(SPI1->SR & SPI_SR_RXNE))
-		;
+uint8_t SPI::Receive(void)
+{
 
-	//возвращаем значение буфера приемника
-	return SPI1->DR;
+	uint16_t RxData = (0 << 8);
+	this->nCS_Low();
+	while (!(this->SPI_ITEM->SR & SPI_SR_TXE))
+		; // Очікую спустошення передавального буфера.
+	this->SPI_ITEM->DR = (uint16_t) RxData;
+
+	while (!(this->SPI_ITEM->SR & SPI_SR_RXNE))
+		; // Очікую заповнення приймального буфера.
+	return (this->SPI_ITEM->DR) & 0xFF;
+	this->nCS_High();
+
 }
 
-void SPI::EnableIRQ(void) {
+void SPI::EnableIRQ(void)
+{
 	//this->SPI_ITEM->CR2 |= SPI_CR2_RXNEIE; // Tx buffer empty interrupt enable
 	//this->SPI_ITEM->CR2 |= SPI_CR2_TXEIE;  // RX buffer not empty interrupt enable
 	//this->SPI_ITEM->CR2 |= SPI_CR2_ERRIE;  // Error interrupt enable
@@ -213,21 +257,27 @@ void SPI::EnableIRQ(void) {
 
 }
 
-uint16_t SPI::TransmitReceive16B(uint16_t TxData) {
-	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0) {
+uint16_t SPI::TransmitReceive16B(uint16_t TxData)
+{
+	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0)
+	{
 	} // Очікую спустошення передавального буфера.
 	this->SPI_ITEM->DR = (uint16_t) TxData;
-	if ((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0) {
+	if ((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0)
+	{
 	} // Очікую заповнення приймального буфера.
 	return this->SPI_ITEM->DR;
 }
 
-uint8_t SPI::TransmitReceive8B(uint8_t TxData) {
+uint8_t SPI::TransmitReceive8B(uint8_t TxData)
+{
 	uint8_t RxData;
-	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0) {
+	if ((this->SPI_ITEM->SR & SPI_SR_TXE) == 0)
+	{
 	} // Очікую спустошення передавального буфера.
 	SPI1_DR_8bit = (uint8_t) TxData;
-	if ((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0) {
+	if ((this->SPI_ITEM->SR & SPI_SR_RXNE) != 0)
+	{
 	} // Очікую заповнення приймального буфера.
 	RxData = SPI1_DR_8bit;
 	return RxData;

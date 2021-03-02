@@ -28,37 +28,49 @@
 volatile uint32_t uptime_ms = 0;
 Uart Debug = Uart(USART1, 115200);
 
-int RxData = 0;
+uint8_t ReceiveRegValue = 0;
+uint8_t Temperature = 0;
+int32_t freq=0;
 
-int main(void) {
+int main(void)
+{
 
 	mstimer_init();
-	RFM69 Modem = RFM69(SPI1, GPIOC, 4, true, DataSize_16B);
 
-	//RxData = Modem.readRegister(0x00);
-	// Modem.writeRegister(0x00, 0x34);
-	//RxData = Modem.readRegister(0x00);
+
+	RFM69 Modem = RFM69(SPI1, GPIOC, 4, true, DataSize_8B);
+
+	//freq = Modem.getFrequency();
+	ReceiveRegValue = Modem.readRegister(REG_NODEADRS);
+	Modem.setAddress(21);
+	ReceiveRegValue = Modem.readRegister(REG_NODEADRS);
+
 	Modem.SetResetPin(GPIOC, 5);
-    Modem.reset();
+	Modem.reset();
+
 	Modem.init();
 	Modem.sleep();
 	Modem.setPowerDBm(10);
 	Modem.setCSMA(true);
 
-	char testdata[] = { 'H', 'e', 'l', 'l', 'o' };
+	char testdata[] =
+	{ 'H', 'e', 'l', 'l', 'o' };
 	Modem.send(testdata, sizeof(testdata));
 	Modem.sleep();
 
 	char rx[8];
-	int bytesReceived = Modem.receive(rx, sizeof(rx));
+	int bytesReceived;
+	bytesReceived = Modem.receive(rx, sizeof(rx));
 
-	/* Loop forever */
-	while (1) {
+
+	while (1)
+	{
 
 	}
 }
 
-extern "C" void SysTick_Handler() {
+extern "C" void SysTick_Handler()
+{
 	uptime_ms++;
 }
 
@@ -66,14 +78,16 @@ extern "C" void SysTick_Handler() {
  *
  * @param ms Milliseconds
  */
-void delay_ms(unsigned ms) {
+void delay_ms(unsigned ms)
+{
 	uint32_t start = uptime_ms;
 	while (uptime_ms - start < ms)
 		;
 }
 
 /** Initialize the millisecond timer. */
-void mstimer_init(void) {
+void mstimer_init(void)
+{
 	SysTick_Config(SystemCoreClock / 1000);
 }
 
@@ -81,6 +95,7 @@ void mstimer_init(void) {
  *
  * @return Milliseconds
  */
-uint32_t mstimer_get(void) {
+uint32_t mstimer_get(void)
+{
 	return uptime_ms;
 }
