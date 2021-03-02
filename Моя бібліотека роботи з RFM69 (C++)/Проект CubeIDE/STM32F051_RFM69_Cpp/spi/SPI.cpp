@@ -43,17 +43,8 @@ SPI::SPI(SPI_TypeDef *Port, SPI_DataSize_t size)
 }
 void SPI::Config()
 {
-	//TODO: Повиносити звідси строки в окремі ф-ї елементи
-
-	//this->SPI_ITEM->CR1 |= SPI_CR1_BIDIMODE; // 0: 2-проводной режим роботи з однонаправленою передачею по лініях даних
-	// 1: 1-проводной режим роботи з двунаправленою передачею по лініях даних
-
-	//this->SPI_ITEM->CR1 |= SPI_CR1_BIDIOE;   // 1: Лише прийом (працює лише при BIDIMODE = 1)
-	// 0: Лише передача (працює лише при BIDIMODE = 1)
-
 	this->SPI_ITEM->CR1 |= SPI_CR1_MSTR;       // 1: Master configuration
 											   // 0: Slave configuration
-
 	this->SPI_ITEM->CR2 &= ~SPI_CR2_DS;       // Clear bitfield
 
 }

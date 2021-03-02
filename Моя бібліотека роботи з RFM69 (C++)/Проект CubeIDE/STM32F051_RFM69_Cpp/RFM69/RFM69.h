@@ -12,7 +12,7 @@
 #include "RFM69_Registers.h"
 
 
-
+#define REGISTER_DETAIL
 #define RF69_FSTEP  61.03515625
 #define RFM69_MAX_PAYLOAD 64 //
 
@@ -67,7 +67,9 @@ public:
 	uint32_t getFrequency();
 	void setAddress(uint16_t addr);
 	void setNetwork(uint8_t networkID);
+	void readAllRegs();
 private:
+
 	void transmit(uint8_t rx);
 	void clearFIFO(void);
 	void waitForModeReady();

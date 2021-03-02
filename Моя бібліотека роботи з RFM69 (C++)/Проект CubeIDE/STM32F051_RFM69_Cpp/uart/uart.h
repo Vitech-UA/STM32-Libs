@@ -9,6 +9,7 @@
 #define UART_H_
 
 #include "stm32f0xx.h"
+#include "stdarg.h"
 
 #define HCLK 8000000U
 
@@ -39,6 +40,7 @@ public:
 	volatile uint16_t rx_buffer_head = 0;
 	volatile uint16_t rx_buffer_tail = 0;
 	uint8_t rx_buffer[UART_RING_BUFFER_SIZE] = { 0, };
+	void Printf(const char *fmt, ...);
 
 private:
 	void InitGpio(void);

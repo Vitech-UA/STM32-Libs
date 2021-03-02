@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <stm32f0xx.h>
-
+#include <stdio.h>
 #include "Gpio.h"
 #include "SPI.h"
 #include "uart.h"
@@ -31,22 +31,17 @@ Uart Debug = Uart(USART1, 115200);
 uint8_t ReceiveRegValue = 0;
 uint8_t Temperature = 0;
 int32_t freq=0;
+char UART_BUFFER[30];
 
 int main(void)
 {
 
 	mstimer_init();
 
-
 	RFM69 Modem = RFM69(SPI1, GPIOC, 4, true, DataSize_8B);
-
-	//freq = Modem.getFrequency();
-	ReceiveRegValue = Modem.readRegister(REG_NODEADRS);
-	Modem.setAddress(21);
-	ReceiveRegValue = Modem.readRegister(REG_NODEADRS);
-
 	Modem.SetResetPin(GPIOC, 5);
 	Modem.reset();
+
 
 	Modem.init();
 	Modem.sleep();
@@ -59,7 +54,7 @@ int main(void)
 	Modem.sleep();
 
 	char rx[8];
-	int bytesReceived;
+	int bytesReceived=0;
 	bytesReceived = Modem.receive(rx, sizeof(rx));
 
 
