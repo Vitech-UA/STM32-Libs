@@ -9,7 +9,11 @@
 #define RFM69_H_
 
 #include "SPI.h"
+#include "RFM69_Registers.h"
 
+
+
+#define RF69_FSTEP  61.03515625
 #define RFM69_MAX_PAYLOAD 64 //
 
 typedef enum {
@@ -59,9 +63,12 @@ public:
 	uint8_t readRegister(uint8_t reg);
 	void writeRegister(uint8_t reg, uint8_t value);
 	void SetResetPin(GPIO_TypeDef *RESET_PORT, uint16_t RESET_PIN);
-
+	uint8_t ReadTemperature(uint8_t calFactor);
+	uint32_t getFrequency();
+	void setAddress(uint16_t addr);
+	void setNetwork(uint8_t networkID);
 private:
-	uint8_t TransmitReceive8B(uint8_t reg);
+	void transmit(uint8_t rx);
 	void clearFIFO(void);
 	void waitForModeReady();
 	void waitForPacketSent();
@@ -85,6 +92,7 @@ private:
 	bool _highPowerDevice;
 	uint8_t _powerLevel;
 	int _rssi;
+	uint16_t _address;
 	bool _autoReadRSSI;
 	bool _ookEnabled;
 	RFM69DataMode _dataMode;
