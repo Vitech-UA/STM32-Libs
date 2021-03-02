@@ -8,7 +8,10 @@
 #ifndef UART_H_
 #define UART_H_
 
-#define HCLK 48000000U
+#include "stm32f0xx.h"
+#include "stdarg.h"
+
+#define HCLK 8000000U
 
 #define USE_RINGBUFFER // Розкоментувати для підключення кільцевого буфера
 
@@ -25,6 +28,7 @@ public:
 	Uart(USART_TypeDef *UartPort, uint32_t UsartBrrValue);
 	void SendByte(uint8_t ByteToTransmit);
 	void SendString(char *str);
+	void SendString(uint8_t* str);
 	uint8_t ReceiveByte(void);
 	void EnableTxInterrupt(void);
 	void EnableRxInterrupt(void);
@@ -36,6 +40,7 @@ public:
 	volatile uint16_t rx_buffer_head = 0;
 	volatile uint16_t rx_buffer_tail = 0;
 	uint8_t rx_buffer[UART_RING_BUFFER_SIZE] = { 0, };
+	void Printf(const char *fmt, ...);
 
 private:
 	void InitGpio(void);
