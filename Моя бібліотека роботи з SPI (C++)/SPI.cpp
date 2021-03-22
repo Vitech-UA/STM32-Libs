@@ -156,11 +156,11 @@ void SPI::Disable(void)
 void SPI::SetClockPolarity(ClockPol_t cpol)
 {
 
-	if (cpol = CPOL1)
+	if (cpol == CPOL1)
 	{
 		this->SPI_ITEM->CR1 |= SPI_CR1_CPOL;    // Polarity clc signal CPOL = 1;
 	}
-	if (cpol = CPOL0)
+	if (cpol == CPOL0)
 	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPOL;   // Polarity clc signal CPOL = 0;
 	}
@@ -169,11 +169,11 @@ void SPI::SetClockPolarity(ClockPol_t cpol)
 
 void SPI::SetClockPhase(ClockPhase_t cpha)
 {
-	if (cpha = CPHA1)
+	if (cpha == CPHA1)
 	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPHA;   // Phase clc signal    CPHA = 0;
 	}
-	if (cpha = CPHA0)
+	if (cpha == CPHA0)
 	{
 		this->SPI_ITEM->CR1 &= ~SPI_CR1_CPHA;   // Phase clc signal    CPHA = 0;
 	}
