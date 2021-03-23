@@ -10,6 +10,9 @@
 
 #include "SPI.h"
 #include "delay.h"
+#include "string.h"
+#include "font5x7.h"
+#include "font7x11.h"
 
 #define ST7789_ColorMode_65K    0x50
 #define ST7789_ColorMode_262K   0x60
@@ -73,7 +76,12 @@ public:
 	void BrightnessEnable(void);
 	void BrightnessDisable(void);
 	void FillScreen(uint16_t color);
+	void DrawChar_5x8(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, unsigned char c);
+	void DrawChar_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, unsigned char c);
+	void Print_5x8(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, char *str);
+	void Print_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, char *str);
 private:
+	void DrawPixel(int16_t x, int16_t y, uint16_t color);
 	void ResetLow(void);
 	void ResetHigh(void);
 	void DC_Data(void);

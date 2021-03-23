@@ -47,7 +47,7 @@ ST7789::ST7789(SPI_TypeDef *Port, SPI_DataSize_t size, GPIO_TypeDef *BlinkPort,
 	delayMs(10);
 	this->InversionMode(1);
 	delayMs(10);
-	this->FillScreen(GREEN);
+	this->FillScreen(BLACK);
     this->SetBL(10);
     this->DisplayPower(1);
     delayMs(10);
@@ -232,4 +232,81 @@ void ST7789::DisplayPower(uint8_t On) {
 		this->WriteCMD(ST7789_Cmd_DISPON);
 	else
 		this->WriteCMD(ST7789_Cmd_DISPOFF);
+}
+void ST7789::DrawPixel(int16_t x, int16_t y, uint16_t color) {
+	if ((x < 0) || (x >= ST7789_Width) || (y < 0) || (y >= ST7789_Height))
+		return;
+
+	this->SetWindow(x, y, x, y);
+	this->RamWrite(&color, 1);
+}
+
+void ST7789::DrawChar_5x8(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, unsigned char c)
+{
+  if((x >= 240) || (y >= 240) || ((x + 4) < 0) || ((y + 7) < 0)) return;
+  if(c<128)            c = c-32;
+  if(c>=144 && c<=175) c = c-48;
+  if(c>=128 && c<=143) c = c+16;
+  if(c>=176 && c<=191) c = c-48;
+  if(c>191)  return;
+  for (uint8_t i=0; i<6; i++ )
+	{
+	uint8_t line;
+    if (i == 5) line = 0x00;
+    else line = font[(c*5)+i];
+		for (uint8_t j = 0; j<8; j++)
+		{
+			if (line & 0x01) this->DrawPixel(x + i, y + j, TextColor);
+			else if (!TransparentBg) this->DrawPixel(x + i, y + j, BgColor);
+			line >>= 1;
+		}
+	}
+}
+
+void ST7789::DrawChar_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, unsigned char c)
+{
+	uint8_t i,j;
+  uint8_t buffer[11];
+
+  if((x >= 240) || (y >= 240) || ((x + 4) < 0) || ((y + 7) < 0)) return;
+
+	// Copy selected simbol to buffer
+	memcpy(buffer,&font7x11[(c-32)*11],11);
+	for(j=0;j<11;j++)
+	{
+		for(i=0;i<7;i++)
+		{
+			if ((buffer[j] & (1<<i)) == 0)
+			{
+				if (!TransparentBg) this->DrawPixel(x + i, y + j, BgColor);
+			}
+			else this->DrawPixel(x + i, y + j, TextColor);
+		}
+	}
+}
+
+void ST7789::Print_5x8(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, char *str)
+{
+  unsigned char type = *str;
+  if (type>=128) x = x - 3;
+  while (*str)
+	{
+	  this->DrawChar_5x8(x, y, TextColor, BgColor, TransparentBg, *str++);
+    unsigned char type = *str;
+    if (type>=128) x=x+3;
+    else x=x+6;
+  }
+}
+
+void ST7789::Print_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, char *str)
+{
+  unsigned char type = *str;
+  if (type>=128) x = x - 3;
+  while (*str)
+	{
+	  this->DrawChar_7x11(x, y, TextColor, BgColor, TransparentBg, *str++);
+    unsigned char type = *str;
+    if (type>=128) x=x+8;
+    else x=x+8;
+  }
 }
