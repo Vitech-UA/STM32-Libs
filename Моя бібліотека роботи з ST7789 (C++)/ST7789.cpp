@@ -7,6 +7,24 @@
 
 #include "ST7789.h"
 
+static font_t* fonts[] = {
+#ifdef USE_FONT8
+		&Font8,
+#endif
+#ifdef USE_FONT12
+		&Font12,
+#endif
+#ifdef USE_FONT16
+		&Font16,
+#endif
+#ifdef USE_FONT20
+		&Font20,
+#endif
+#ifdef USE_FONT24
+		&Font24,
+#endif
+	};
+
 /*
  Розпіновка тестової плати
  MOSI - PA7
@@ -36,8 +54,8 @@ ST7789::ST7789(SPI_TypeDef *Port, SPI_DataSize_t size, GPIO_TypeDef *BlinkPort,
 	this->Dc = Gpio(this->ItemDcPort, this->ItemDcPin);
 	this->Dc.SetAsGenerapPurporseOutput(OUTPUT_PP);
 
-	this->ST7789_Width = Width;
-	this->ST7789_Height = Height;
+	this->ST7789_Width = WIDTH;
+	this->ST7789_Height = HEIGHT;
 	this->HardReset();
 	this->SoftReset();
 	this->SleepModeExit();
@@ -309,4 +327,143 @@ void ST7789::Print_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgC
     if (type>=128) x=x+8;
     else x=x+8;
   }
+}
+
+inline uint16_t ST7789::Color565(uint8_t r, uint8_t g, uint8_t b) {
+	return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+}
+
+void ST7789::DrawChar(uint16_t x, uint16_t y, unsigned char c, uint16_t color,
+		uint16_t bg, uint8_t fontindex) {
+	uint16_t height, width, bytes;
+	uint8_t offset;
+	uint32_t charindex = 0;
+	uint8_t *pchar;
+	uint32_t line = 0;
+
+	height = fonts[fontindex]->Height;
+	width = fonts[fontindex]->Width;
+
+	if ((x >= this->ST7789_Width) || // Clip right
+			(y >= this->ST7789_Height) || // Clip bottom
+			((x + width - 1) < 0) || // Clip left
+			((y + height - 1) < 0))   // Clip top
+		return;
+
+	bytes = (width + 7) / 8;
+	if (c < ' ')
+		c = ' ';
+#ifndef USE_CP1251
+	else if (c > '~')
+		c = ' ';
+#endif
+	charindex = (c - ' ') * height * bytes;
+	offset = 8 * bytes - width;
+
+	for (uint32_t i = 0; i < height; i++) {
+		pchar = ((uint8_t *) &fonts[fontindex]->table[charindex]
+				+ (width + 7) / 8 * i);
+		switch (bytes) {
+		case 1:
+			line = pchar[0];
+			break;
+		case 2:
+			line = (pchar[0] << 8) | pchar[1];
+			break;
+		case 3:
+		default:
+			line = (pchar[0] << 16) | (pchar[1] << 8) | pchar[2];
+			break;
+		}
+		for (uint32_t j = 0; j < width; j++) {
+			if (line & (1 << (width - j + offset - 1))) {
+				this->DrawPixel((x + j), y, color);
+			} else {
+				this->DrawPixel((x + j), y, bg);
+			}
+		}
+		y++;
+	}
+}
+
+void ST7789::Printf(uint16_t m_cursor_x, uint16_t m_cursor_y,uint16_t m_textcolor,
+		uint16_t m_textbgcolor, uint8_t fontIndex, const char *fmt, ...) {
+	static char buf[256];
+	char *p;
+	va_list lst;
+
+	va_start(lst, fmt);
+	vsprintf(buf, fmt, lst);
+	va_end(lst);
+
+	volatile uint16_t height, width;
+
+	height = fonts[fontIndex]->Height;
+	width = fonts[fontIndex]->Width;
+
+	p = buf;
+	while (*p) {
+		if (*p == '\n') {
+			m_cursor_y += height;
+			m_cursor_x = 0;
+		} else if (*p == '\r') {
+			m_cursor_x = 0;
+		} else if (*p == '\t') {
+			m_cursor_x += width * 4;
+		} else {
+			if (m_cursor_x == 0) {
+				this->SetWindow(0,m_cursor_y, this->ST7789_Width - 1,
+						m_cursor_y + height);
+				this->Flood(m_textbgcolor, (long) this->ST7789_Width * height);
+				this->SetWindow(0, 0, this->ST7789_Width - 1, this->ST7789_Height - 1);
+			}
+			if (m_cursor_y >= (this->ST7789_Height - height)) {
+				m_cursor_y = 0;
+				this->FillScreen(this->m_textbgcolor);
+			}
+			this->DrawChar(m_cursor_x, m_cursor_y, *p, m_textcolor, m_textbgcolor,
+					fontIndex);
+			m_cursor_x += width;
+			if (m_wrap && (m_cursor_x > (this->ST7789_Width - width))) {
+				m_cursor_y += height;
+				m_cursor_x = 0;
+			}
+		}
+		p++;
+	}
+}
+
+
+void ST7789::Flood(uint16_t color, uint32_t len) {
+	//LCD_CS_LOW
+
+	len--;
+	while (len--) {
+		this->WriteMultiple((uint8_t *) &color, 2);
+	}
+	//LCD_CS_HIGH
+}
+void ST7789::WriteMultiple(uint8_t * pData, uint32_t size) {
+	if (size == 1) {
+		/* Only 1 byte to be sent to LCD - general interface can be used */
+		/* Send Data */
+		this->Write(*pData);
+	} else {
+		/* Several data should be sent in a raw */
+		/* Direct SPI accesses for optimization */
+		for (uint32_t counter = size; counter != 0; counter -= 2) {
+			while (((this->SPI_ITEM->SR) & SPI_SR_TXE) != SPI_SR_TXE) {
+			}
+			/* Need to invert bytes for LCD*/
+			*((__IO uint8_t*) &(this->SPI_ITEM->DR)) = *(pData + 1);
+			while (((this->SPI_ITEM->SR) & SPI_SR_TXE) != SPI_SR_TXE) {
+			}
+			*((__IO uint8_t*) &(this->SPI_ITEM->DR)) = *pData;
+			pData += 2;
+		}
+
+		/* Wait until the bus is ready before releasing Chip select */
+		while (((this->SPI_ITEM->SR) & SPI_SR_BSY) != RESET) {
+		}
+	}
 }

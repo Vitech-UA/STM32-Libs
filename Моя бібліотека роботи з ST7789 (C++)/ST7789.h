@@ -13,7 +13,9 @@
 #include "string.h"
 #include "font5x7.h"
 #include "font7x11.h"
-
+#include "fonts.h"
+#include "stdarg.h"
+#include <stdio.h>
 #define ST7789_ColorMode_65K    0x50
 #define ST7789_ColorMode_262K   0x60
 #define ST7789_ColorMode_12bit  0x03
@@ -62,8 +64,8 @@
 #define YELLOW   0xFFE0
 #define WHITE    0xFFFF
 
-#define Width 240
-#define Height 240
+#define WIDTH 240
+#define HEIGHT 240
 
 #define ST7789_X_Start          0
 #define ST7789_Y_Start          0
@@ -80,7 +82,14 @@ public:
 	void DrawChar_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, unsigned char c);
 	void Print_5x8(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, char *str);
 	void Print_7x11(uint16_t x, uint16_t y, uint16_t TextColor, uint16_t BgColor, uint8_t TransparentBg, char *str);
+	void DrawChar(uint16_t x, uint16_t y, unsigned char c, uint16_t color,
+			uint16_t bg, uint8_t fontindex);
+	void Printf(uint16_t m_cursor_x, uint16_t m_cursor_y,uint16_t m_textcolor,
+			uint16_t m_textbgcolor, uint8_t fontIndex, const char *fmt, ...);
 private:
+	void WriteMultiple(uint8_t * pData, uint32_t size);
+	void Flood(uint16_t color, uint32_t len);
+	uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
 	void DrawPixel(int16_t x, int16_t y, uint16_t color);
 	void ResetLow(void);
 	void ResetHigh(void);
@@ -115,6 +124,15 @@ private:
 	Gpio Dc;
 	uint8_t ST7789_Width;
 	uint8_t ST7789_Height;
+	static int16_t m_cursor_x;
+	static int16_t m_cursor_y;
+
+	uint16_t m_textcolor;
+	uint16_t m_textbgcolor;
+	uint8_t m_font;
+	uint8_t m_rotation;
+	uint8_t m_wrap;
+
 };
 
 #endif /* ST7789_H_ */
