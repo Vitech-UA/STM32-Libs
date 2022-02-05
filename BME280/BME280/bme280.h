@@ -1,25 +1,20 @@
 /*
  * bme280.h
  *
- *  Created on: 10 нояб. 2019 г.
+ *  Created on: 10 пїЅпїЅпїЅпїЅ. 2019 пїЅ.
  *      Author: Embed Viktor
  */
 
 #ifndef BME280_H_
 #define BME280_H_
-#include "stm32f0xx_hal.h"
-#include "i2c.h"
+#include "stm32f3xx_hal.h"
+
 
 #include "math.h"
 #include "string.h"
 
-#define USE_UART_DEBUG 0 /*Встановити 1 для виводу відладочних даних у термінал*/
 
-#if USE_UART_DEBUG == 1
-#define DEBUG_UART &huart2 /*Порт UART для відладки у термінал*/
-#endif
-
-#define BME280_I2C_PORT &hi2c1 /*Інтерфейс I2C на якому сидить сенсор BME280*/
+#define BME280_I2C_PORT &hi2c1
 
 #define LED_GPIO_PORT GPIOA
 #define LED_PIN GPIO_PIN_5
@@ -30,7 +25,7 @@
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define SEALEVELPRESSURE_PA (1013250)
 
-/*Макроси пестановки байтів*/
+/*пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ*/
 #define be16toword(a) ((((a)>>8) & 0xff) | (((a)<<8) & 0xff00))
 #define be24toword(a) ((((a)>>16)&0x000000ff)|((a)&0x0000ff00)|(((a)<<16)&0x00ff0000))
 
@@ -87,7 +82,7 @@
 #define BME280_FILTER_8 0x0C
 #define BME280_FILTER_16 0x10
 
-/* Біти і маски для налаштувань оверсемлінга */
+/* пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 #define BME280_OSRS_T_MSK 0xE0
 #define BME280_OSRS_T_SKIP 0x00
 #define BME280_OSRS_T_x1 0x20
@@ -115,7 +110,7 @@
 #define BME280_MODE_SLEEP 0x00
 #define BME280_MODE_FORCED 0x01
 #define BME280_MODE_NORMAL 0x03
-/***Структура калібровочних даних***/
+/***пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ***/
 typedef struct
 {
   uint16_t dig_T1;
@@ -138,12 +133,19 @@ typedef struct
   int8_t dig_H6;
 } BME280_CalibData;
 
-/*Прототипи функцій роботи з сенсором*/
-
 void BME280_Init();
-float BME280_ReadTemperature();
-float BME280_ReadPressure();
+float BME280_get_temperature();
+float BME280_get_pressure();
 float BME280_ReadAltitude(float seaLevel);
-float BME280_ReadHumidity();
+float BME280_get_humidity();
+void BME280_ReadReg_BE_U24(uint8_t Reg, uint32_t *Value);
+void BME280_ReadReg_S16(uint8_t Reg, int16_t *Value);
+void BME280_ReadReg_U16(uint8_t Reg, uint16_t *Value);
 uint8_t BME280_ReadReg(uint8_t Reg);
+void BME280_SetFilter(uint8_t filter);
+void BME280_SetMode(uint8_t mode);
+void BME280_SetOversamplingHum(uint8_t osrs);
+void BME280_SetOversamplingPressure(uint8_t osrs);
+void BME280_SetOversamplingTemper(uint8_t osrs);
+void BME280_WriteReg(uint8_t Reg, uint8_t Value);
 #endif /* BME280_H_ */
