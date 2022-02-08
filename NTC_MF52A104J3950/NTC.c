@@ -6,7 +6,7 @@
  */
 
 #include "NTC.h"
-
+#include <math.h>
 
 
 float THERMISTOR_RESISTANCE = 0.0;
@@ -31,14 +31,7 @@ double dNTCGetTemperature(int NTC_index) {
 
 	THERMISTOR_RESISTANCE = BALANCE_RESISTOR * ((MAX_ADC / adc) - 1);
 
-	tCelsium =
-			(BETA * ROOM_TEMP)
-					/ (BETA
-							+ (ROOM_TEMP
-									* log10(
-											THERMISTOR_RESISTANCE
-													/ RESISTOR_ROOM_TEMP)))
-					- 273.15;
+	tCelsium =(BETA * ROOM_TEMP)/ (BETA+ (ROOM_TEMP* log10(THERMISTOR_RESISTANCE/ RESISTOR_ROOM_TEMP)))- 273.15;
 	return tCelsium;
 }
 
