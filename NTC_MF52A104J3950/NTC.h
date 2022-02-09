@@ -18,6 +18,7 @@ extern ADC_HandleTypeDef hadc1;
 #define ROOM_TEMP  298.15
 #define RESISTOR_ROOM_TEMP  100000.0
 
-double dNTCGetTemperature(int NTC_index);
+float ntc_get_temp(int adc_raw_data);
+
 
 #endif /* NTC_H_ */
