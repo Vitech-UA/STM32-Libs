@@ -130,3 +130,5 @@ void mcp23013_set_pin_state(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
 		uint8_t gpio_pin, gpio_state_t state);
 void mcp23013_set_pin_dir(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
 		uint8_t gpio_pin, gpio_dir_t mode);
+bool mcp23013_get_pin_state(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
+		uint8_t gpio_pin);
