@@ -1,8 +1,8 @@
 #include "main.h"
 #include "stdbool.h"
 // Ports
-#define MCP23017_PORTA			0x00
-#define MCP23017_PORTB			0x01
+#define MCP23017_PORTA			0x12
+#define MCP23017_PORTB			0x13
 // Address (A0-A2)
 #define MCP23017_ADDRESS_20		0x20
 #define MCP23017_ADDRESS_21		0x21
@@ -73,8 +73,8 @@
 #define REGISTER_DEFVALB	0x07
 #define REGISTER_INTCONA	0x08
 #define REGISTER_INTCONB	0x09
-//	IOCON			0x0A
-//	IOCON			0x0B
+#define REGISTER_IOCONA		0x0A
+#define REGISTER_IOCONB		0x0A
 #define REGISTER_GPPUA		0x0C
 #define REGISTER_GPPUB		0x0D
 #define REGISTER_INTFA		0x0E
@@ -110,15 +110,24 @@ typedef struct
 
 typedef enum
 {
-	GPIO_OUTPUT,
-	GPIO_INPUT
-}gpio_dir_t;
+	GPIO_OUTPUT, GPIO_INPUT
+} gpio_dir_t;
 
 typedef enum
 {
-	GPIO_RESET,
-	GPIO_SET
-}gpio_state_t;
+	PIN_PULLUP_DISABLED, PIN_PULLUP_ENABLED
+} gpio_pullup_down_t;
+
+typedef enum
+{
+	GPIO_RESET, GPIO_SET
+} gpio_state_t;
+
+typedef enum
+{
+	INT_OUT_PP, INT_OUT_OD,
+} int_out_t;
+
 
 void mcp23017_init(MCP23017_HandleTypeDef *hdev, I2C_HandleTypeDef *hi2c,
 		uint16_t addr);
@@ -132,3 +141,9 @@ void mcp23013_set_pin_dir(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
 		uint8_t gpio_pin, gpio_dir_t mode);
 bool mcp23013_get_pin_state(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
 		uint8_t gpio_pin);
+void mcp23013_set_pin_interrupt(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
+		uint8_t gpio_pin);
+void mcp23017_INTpin_config(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
+		int_out_t INT_pin_type);
+void mcp23013_set_pullup_pulldown(MCP23017_HandleTypeDef *hdev, uint8_t gpio_port,
+		uint8_t gpio_pin, gpio_pullup_down_t mode);

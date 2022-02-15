@@ -23,7 +23,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "MCP23017.h"
-#include "utility.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,12 +43,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 SPI_HandleTypeDef hspi1;
-
 UART_HandleTypeDef huart2;
 I2C_HandleTypeDef hi2c1;
+
+uint8_t int_flag = 0;
 /* USER CODE BEGIN PV */
 void I2C_ScanBus();
-
+MCP23017_HandleTypeDef hmcp;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,8 +74,8 @@ static void MX_SPI1_Init(void);
 int main(void)
 {
 	/* USER CODE BEGIN 1 */
-	// char LCD_BUFFER[50];
-	MCP23017_HandleTypeDef hmcp;
+	uint8_t read_reg_val[1] =
+	{ };
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -104,16 +105,31 @@ int main(void)
 
 	mcp23017_init(&hmcp, &hi2c1, MCP23017_ADDRESS_27);
 
+	// Налаштування GPIOA7 на вихід і встановка на ньому високого рівня
+	mcp23013_set_pin_dir(&hmcp, MCP23017_PORTA, MCP23017_GPIO7, GPIO_OUTPUT);
+	mcp23013_set_pin_state(&hmcp, MCP23017_PORTA, MCP23017_GPIO7, GPIO_PIN_SET);
 
-	// Конфігурація пінів вх. вих.
-	mcp23013_set_pin_dir(&hmcp, MCP23017_PORTB, MCP23017_GPIO0, GPIO_OUTPUT);
+	// Налаштування GPIOB1 на вхід з підтяжкою і читання його стану
 	mcp23013_set_pin_dir(&hmcp, MCP23017_PORTB, MCP23017_GPIO1, GPIO_INPUT);
+	mcp23013_set_pullup_pulldown(&hmcp, MCP23017_PORTB, MCP23017_GPIO1,
+			PIN_PULLUP_ENABLED);
+	mcp23017_read_reg(&hmcp, REGISTER_GPIOB, &read_reg_val[0]);
+	if (read_reg_val[0] & MCP23017_GPIO1)
+	{
+		UART_Printf("GPIOB1 - HIGH\r\n");
+	}
+	else
+	{
+		UART_Printf("GPIOB1 - LOW\r\n");
+	}
 
-	// Запис в пін
-	mcp23013_set_pin_state(&hmcp, MCP23017_PORTB, MCP23017_GPIO0, GPIO_PIN_SET);
-
-	// Читання з піна
-    mcp23013_get_pin_state(&hmcp, MCP23017_PORTB, MCP23017_GPIO0);
+	//(1)Налаштування піна GPIOB0 для роботи у режимі переривань
+	//(1.1) Налаштування власне піна
+	mcp23013_set_pullup_pulldown(&hmcp, MCP23017_PORTB, MCP23017_GPIO0, PIN_PULLUP_ENABLED);
+	mcp23013_set_pin_dir(&hmcp, MCP23017_PORTB, MCP23017_GPIO0, GPIO_INPUT);
+	mcp23013_set_pin_interrupt(&hmcp, MCP23017_PORTB, MCP23017_GPIO0);
+	//(1.2) Налаштування виходу INTB, який сповістить про те, що відбулось переривання
+	mcp23017_INTpin_config(&hmcp, MCP23017_PORTB, INT_OUT_PP);
 
 	/* USER CODE END 2 */
 
@@ -122,7 +138,19 @@ int main(void)
 
 	while (1)
 	{
+		if (int_flag == 1)
+		{
 
+			UART_Printf("---------IRQ---------\r\n");
+			UART_Printf("READ INTCAPB: ");
+			// Для скидання флагу переривання необхідно зчитати регістр INTCAP
+			mcp23017_read_reg(&hmcp, REGISTER_INTCAPB, &read_reg_val[0]);
+			print_binary(sizeof(read_reg_val[0]), &read_reg_val[0]);
+			UART_Printf("---------------------\r\n");
+			int_flag = 0;
+			__NVIC_EnableIRQ(EXTI0_IRQn);
+		}
+		HAL_Delay(200);
 
 		/* USER CODE END WHILE */
 
