@@ -1,0 +1,6 @@
+How to generate source code documentation (MS Windows users):
+
+1. Install Doxygen (www.doxygen.org)
+2. Open the 'config.doxygen' file in the Doxygen Wizard.
+3. Generate documentation by clicking Start.
+4. HTML-type documentation is found in readme.html which links to .\doxygen\index.html
