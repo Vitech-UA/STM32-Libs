@@ -1,7 +1,7 @@
 
 
 // Підключити лібу під свій МК
-#include "stm32f3xx_hal.h"
+#include "stm32f1xx_hal.h"
 
 #include "si5351.h"
 #define SI5351_ADDRESS 0x60
