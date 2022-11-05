@@ -1,0 +1,154 @@
+/* USER CODE BEGIN Includes */
+#include "hd44780.h"
+#include "stm32_device.h"
+#include "stdio.h"
+/* USER CODE END Includes */
+
+
+/* USER CODE BEGIN PFP */
+void imitationPrinting(char *ptr);
+/* USER CODE END PFP */
+
+
+/* USER CODE BEGIN 1 */
+char str[17] = {};
+float pi = 3.14;
+int t = 123;
+unsigned char men1[FONT_HEIGHT] = {0x0e,0x0e,0x04,0x1f,0x04,0x1a,0x01,0x00};
+unsigned char men2[FONT_HEIGHT] = {0x07,0x07,0x0a,0x07,0x02,0x05,0x09,0x00};
+/* USER CODE END 1 */
+
+  /* USER CODE BEGIN 2 */
+#ifndef USE_I2C_BUS
+  lcdConfig.mcuFreq = HAL_RCC_GetHCLKFreq();
+#endif
+  lcdInit(&lcdConfig);
+#ifdef USE_I2C_BUS
+  lcdBackLightOn();
+#else
+
+#endif /* USE_I2C_BUS */
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	lcdClrScr();
+#ifdef USE_I2C_BUS
+	lcdPuts("STM32F103RB v13\nHD44780 I2C");
+#else
+	lcdPuts("STM32F103RB v16\nHD44780 4bit");
+#endif /* USE_I2C_BUS */
+	HAL_Delay(5000);
+	uint32_t freq = HAL_RCC_GetHCLKFreq();
+	lcdClrScr();
+	lcdPuts("GetHCLKFreq()\n\t");
+	lcdItos(freq / 1000000);
+	lcdPuts("MHz");
+	HAL_Delay(5000);
+
+	for (int i = 0; i < 16; ++i)
+	{
+		lcdScroll(RIGHT);
+		HAL_Delay(250);
+	}
+
+	lcdClrScr();
+
+	sprintf(str,"STM32F103RB and");
+	imitationPrinting(str);
+	sprintf(str,"LCD WH1602A Demo");
+	lcdGoto(LCD_2nd_LINE,0);
+	imitationPrinting(str);
+	HAL_Delay(3000);
+
+	for (int i = 0; i < 16; ++i)
+	{
+		lcdScroll(LEFT);
+		HAL_Delay(250);
+	}
+
+	HAL_Delay(1000);
+
+	for (int i = 0; i < 16; ++i)
+	{
+		lcdScroll(RIGHT);
+		HAL_Delay(250);
+	}
+
+	HAL_Delay(2000);
+	lcdClrScr();
+	lcdPuts("Float = ");
+	lcdFtos(pi,2);
+	lcdGoto(LCD_2nd_LINE,0);
+	lcdPuts("Integer = ");
+	lcdItos(t);
+	HAL_Delay(3000);
+	lcdSetMode(VIEW_MODE_DispOn_BlkOff_CrsOn);
+	lcdGoto(LCD_2nd_LINE,16);
+	for (int i = 0; i < 16; ++i)
+	{
+		lcdBackSpace();
+		HAL_Delay(100);
+	}
+
+	lcdGoto(LCD_1st_LINE,16);
+
+	for (int i = 0; i < 16; ++i)
+	{
+		lcdBackSpace();
+		HAL_Delay(100);
+	}
+
+	lcdSetMode(VIEW_MODE_DispOn_BlkOff_CrsOff);
+    lcdReturn();
+    lcdPuts("\tLoading...");
+    lcdGoto(PROGRESS_BAR_LINE, PROGRESS_BAR_WIDTH);
+    lcdPuts("[   %]");
+    for(uint8_t i = 0; i <= PROGRESS_BAR_MAX_LOAD; ++i)
+    {
+    	lcdGoto(PROGRESS_BAR_LINE, PROGRESS_BAR_WIDTH + 1);
+    	lcdNtos((i*100)/PROGRESS_BAR_MAX_LOAD, 3 );
+    	lcdDrawBar(i);
+    	HAL_Delay(100);
+    }
+
+    HAL_Delay(3000);
+    lcdClrScr();
+    lcdLoadChar(men1,6);
+    lcdLoadChar(men2,7);
+    lcdPuts("\tRunning men\n");
+
+    for(uint8_t i = 0; i < 8; i++)
+    {
+    	lcdPutc(6);
+    	HAL_Delay(250);
+    	cursorShift(LEFT);
+    	lcdPutc(' ');
+    	lcdPutc(7);
+    	HAL_Delay(250);
+    	cursorShift(LEFT);
+    	lcdPutc(' ');
+    }
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/* USER CODE BEGIN 4 */
+void imitationPrinting(char *ptr)
+{
+	lcdSetMode(VIEW_MODE_DispOn_BlkOff_CrsOn);
+
+	while(*ptr != 0)
+	{
+		lcdPutc(*ptr++);
+		HAL_Delay(100);
+	}
+
+	lcdSetMode(VIEW_MODE_DispOn_BlkOff_CrsOff);
+}
+/* USER CODE END 4 */
