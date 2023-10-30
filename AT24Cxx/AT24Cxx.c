@@ -1,98 +1,207 @@
-/*
- * AT24Cxx.c
- *
- *  Created on: 20 трав. 2018 р.
- *      Author: Andriy
+/**
+ ******************************************************************************
+
+ EEPROM.c Using the HAL I2C Functions
+ Author:   ControllersTech
+ Updated:  Feb 16, 2021
+
+ ******************************************************************************
+ Copyright (C) 2017 ControllersTech.com
+
+ This is a free software under the GNU license, you can redistribute it and/or modify it under the terms
+ of the GNU General Public License version 3 as published by the Free Software Foundation.
+ This software library is shared with public for educational purposes, without WARRANTY and Author is not liable for any damages caused directly
+ or indirectly by this software, read more about this on the GNU General Public License.
+
+ ******************************************************************************
  */
-#include "AT24Cxx.h"
 
-// Перетворюємо адресу з 7 біт на на 8 біт
-static unsigned eeprom_address = EEPROM_ADDRESS << 1;
-// Маску обчислюємо по заданому розміру сторінки.
-static unsigned inpage_addr_mask = EEPROM_PAGESIZE - 1;
+#include <AT24C256.h>
+#include "math.h"
+#include "string.h"
 
-static HAL_StatusTypeDef AT24Cxx_WriteReadEEPROM(unsigned address, const void* src, unsigned len, bool write);
-static unsigned size_to_page_end(unsigned addr);
+// Define the I2C
+extern I2C_HandleTypeDef hi2c1;
+#define EEPROM_I2C &hi2c1
 
-HAL_StatusTypeDef AT24Cxx_IsConnected(void)
-{
-	return HAL_I2C_IsDeviceReady(&EEPROM_I2C, eeprom_address, 1, EEPROM_TIMEOUT);
+// EEPROM ADDRESS (8bits)
+#define EEPROM_ADDR 0xA0
+
+// Define the Page Size and number of pages
+#define PAGE_SIZE 64     // in Bytes
+#define PAGE_NUM  512    // number of pages
+
+/*****************************************************************************************************************************************/
+uint8_t bytes_temp[4];
+
+// function to determine the remaining bytes
+uint16_t bytestowrite(uint16_t size, uint16_t offset) {
+	if ((size + offset) < PAGE_SIZE)
+		return size;
+	else
+		return PAGE_SIZE - offset;
 }
 
-HAL_StatusTypeDef AT24Cxx_ReadEEPROM(unsigned address, const void* src, unsigned len)
-{
-	return AT24Cxx_WriteReadEEPROM(address, src, len, false);
+/* write the data to the EEPROM
+ * @page is the number of the start page. Range from 0 to PAGE_NUM-1
+ * @offset is the start byte offset in the page. Range from 0 to PAGE_SIZE-1
+ * @data is the pointer to the data to write in bytes
+ * @size is the size of the data
+ */
+void EEPROM_Write(uint16_t page, uint16_t offset, uint8_t *data, uint16_t size) {
+
+	// Find out the number of bit, where the page addressing starts
+	int paddrposition = log(PAGE_SIZE) / log(2);
+
+	// calculate the start page and the end page
+	uint16_t startPage = page;
+	uint16_t endPage = page + ((size + offset) / PAGE_SIZE);
+
+	// number of pages to be written
+	uint16_t numofpages = (endPage - startPage) + 1;
+	uint16_t pos = 0;
+
+	// write the data
+	for (int i = 0; i < numofpages; i++) {
+		/* calculate the address of the memory location
+		 * Here we add the page address with the byte address
+		 */
+		uint16_t MemAddress = startPage << paddrposition | offset;
+		uint16_t bytesremaining = bytestowrite(size, offset); // calculate the remaining bytes to be written
+
+		HAL_I2C_Mem_Write(EEPROM_I2C, EEPROM_ADDR, MemAddress, 2, &data[pos],
+				bytesremaining, 1000);  // write the data to the EEPROM
+
+		startPage += 1; // increment the page, so that a new page address can be selected for further write
+		offset = 0; // since we will be writing to a new page, so offset will be 0
+		size = size - bytesremaining;  // reduce the size of the bytes
+		pos += bytesremaining;  // update the position for the data buffer
+
+		HAL_Delay(5);  // Write cycle delay (5ms)
+	}
 }
 
-HAL_StatusTypeDef AT24Cxx_WriteEEPROM(unsigned address, const void* src, unsigned len)
-{
-	return AT24Cxx_WriteReadEEPROM(address, src, len, true);
+void float2Bytes(uint8_t *ftoa_bytes_temp, float float_variable) {
+	union {
+		float a;
+		uint8_t bytes[4];
+	} thing;
+
+	thing.a = float_variable;
+
+	for (uint8_t i = 0; i < 4; i++) {
+		ftoa_bytes_temp[i] = thing.bytes[i];
+	}
+
 }
 
-static HAL_StatusTypeDef AT24Cxx_WriteReadEEPROM(unsigned address, const void* src, unsigned len, bool write)
-{
-	uint8_t *pdata = (uint8_t*) src;
+float Bytes2float(uint8_t *ftoa_bytes_temp) {
+	union {
+		float a;
+		uint8_t bytes[4];
+	} thing;
 
-	HAL_StatusTypeDef result = HAL_OK;
+	for (uint8_t i = 0; i < 4; i++) {
+		thing.bytes[i] = ftoa_bytes_temp[i];
+	}
 
-    // Перша порція не може бути більша, щоб не перетнула розмір сторінки
-    unsigned max_portion = size_to_page_end(address);
-    unsigned portion;
-
-    while (len != 0 && result == HAL_OK)
-    {
-        portion = len;              // Все, що залишилося -- у одну порцію
-
-        if (portion > max_portion)
-        {
-        	portion = max_portion;  // Порція завелика, зменшуємо
-        }
-
-        // Працюємо із порцією, яку можна проковтнути
-        if(write)
-		{
-			result = HAL_I2C_Mem_Write(&EEPROM_I2C,
-									eeprom_address,
-									address,
-									I2C_MEMADD_SIZE_16BIT,
-									pdata,
-									portion,
-									EEPROM_TIMEOUT);
-		}
-        else
-        {
-        	result = HAL_I2C_Mem_Read(&EEPROM_I2C,
-        	        				eeprom_address,
-        							address,
-        							I2C_MEMADD_SIZE_16BIT,
-        							pdata,
-        							portion,
-        							EEPROM_TIMEOUT);
-        }
-
-        // І реєструємо, що вже це зробили.
-        len     -= portion;
-        address += portion;
-        pdata   += portion;
-
-        // наступне, якщо взагалі буде, буде від початку сторінки
-        max_portion = EEPROM_PAGESIZE;
-
-        if(write)
-        {
-        	HAL_Delay(EEPROM_WRITE);
-        }
-        else
-        {
-        	HAL_Delay(EEPROM_WRITE / 2);
-        }
-    }
-
-    return result;
+	float float_variable = thing.a;
+	return float_variable;
 }
 
-// обчислення відстані до кінця сторінки
-static unsigned size_to_page_end(unsigned addr)
-{
-    return (~addr & inpage_addr_mask) + 1;
+/*Write the Float/Integer values to the EEPROM
+ * @page is the number of the start page. Range from 0 to PAGE_NUM-1
+ * @offset is the start byte offset in the page. Range from 0 to PAGE_SIZE-1
+ * @data is the float/integer value that you want to write
+ */
+
+void EEPROM_Write_float(uint16_t page, uint16_t offset, float data) {
+
+	float2Bytes(bytes_temp, data);
+
+	EEPROM_Write(page, offset, bytes_temp, 4);
+}
+
+/* Reads the single Float/Integer values from the EEPROM
+ * @page is the number of the start page. Range from 0 to PAGE_NUM-1
+ * @offset is the start byte offset in the page. Range from 0 to PAGE_SIZE-1
+ * @returns the float/integer value
+ */
+
+float EEPROM_Read_float(uint16_t page, uint16_t offset) {
+	uint8_t buffer[4];
+
+	EEPROM_Read(page, offset, buffer, 4);
+
+	return (Bytes2float(buffer));
+}
+
+/* READ the data from the EEPROM
+ * @page is the number of the start page. Range from 0 to PAGE_NUM-1
+ * @offset is the start byte offset in the page. Range from 0 to PAGE_SIZE-1
+ * @data is the pointer to the data to write in bytes
+ * @size is the size of the data
+ */
+void EEPROM_Read(uint16_t page, uint16_t offset, uint8_t *data, uint16_t size) {
+	int paddrposition = log(PAGE_SIZE) / log(2);
+
+	uint16_t startPage = page;
+	uint16_t endPage = page + ((size + offset) / PAGE_SIZE);
+
+	uint16_t numofpages = (endPage - startPage) + 1;
+	uint16_t pos = 0;
+
+	for (int i = 0; i < numofpages; i++) {
+		uint16_t MemAddress = startPage << paddrposition | offset;
+		uint16_t bytesremaining = bytestowrite(size, offset);
+		HAL_I2C_Mem_Read(EEPROM_I2C, EEPROM_ADDR, MemAddress, 2, &data[pos],
+				bytesremaining, 1000);
+		startPage += 1;
+		offset = 0;
+		size = size - bytesremaining;
+		pos += bytesremaining;
+	}
+}
+
+/* Erase a page in the EEPROM Memory
+ * @page is the number of page to erase
+ * In order to erase multiple pages, just use this function in the for loop
+ */
+void EEPROM_PageErase(uint16_t page) {
+	// calculate the memory address based on the page number
+	int paddrposition = log(PAGE_SIZE) / log(2);
+	uint16_t MemAddress = page << paddrposition;
+
+	// create a buffer to store the reset values
+	uint8_t data[PAGE_SIZE];
+	memset(data, 0xff, PAGE_SIZE);
+
+	// write the data to the EEPROM
+	HAL_I2C_Mem_Write(EEPROM_I2C, EEPROM_ADDR, MemAddress, 2, data, PAGE_SIZE,
+			1000);
+
+	HAL_Delay(5);  // write cycle delay
+}
+
+void EEPROM_write_uint32(uint16_t page, uint16_t offset, uint32_t int_to_write) {
+	uint8_t data[4];
+	data[0] = int_to_write;
+	data[1] = (int_to_write >> 8);
+	data[2] = (int_to_write >> 16);
+	data[3] = (int_to_write >> 24);
+	EEPROM_Write(page, offset, data, 4);
+}
+
+uint32_t EEPROM_read_uint32(uint16_t page, uint16_t offset) {
+	uint32_t int_to_return = 0;
+	uint8_t data[4];
+	EEPROM_Read(page, offset, data, 4);
+	int_to_return = data[3];
+	int_to_return <<= 8;
+	int_to_return |= data[2];
+	int_to_return <<= 8;
+	int_to_return |= data[1];
+	int_to_return <<= 8;
+	int_to_return |= data[0];
+	return int_to_return;
 }
