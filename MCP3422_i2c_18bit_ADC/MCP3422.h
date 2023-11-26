@@ -1,6 +1,6 @@
 #include "stm32f1xx_hal.h"
 
-#define MCP3422_I2C_ADDRESS 0xD2
+#define MCP3422_ADDRESS 0xD2
 
 typedef enum {
     MCP3422_CHANNEL_1 = 0,
@@ -29,4 +29,7 @@ typedef enum {
 void MCP3422_config(MCP3422_Channel channel,
 		MCP3422_Resolution resolution, MCP3422_Gain gain,
 		MCP3422_ConversionMode conversionMode);
-float MCP3422_read_voltage_float(void);
+uint32_t MCP3422_Read_Raw();
+float MCP3422_ConvertToVolts(uint32_t rawData);
+void UART_TransmitFloat(UART_HandleTypeDef *huart, float value);
+void MCP3422_WaitForConversion();
